@@ -1,4 +1,5 @@
 # build output
+# dist/
 
 # generated types
 .astro/
@@ -28,3 +29,4 @@ yarn.lock
 # ide
 .idea
 *.iml
+# server.cjs

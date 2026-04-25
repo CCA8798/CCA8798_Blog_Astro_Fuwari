@@ -11,6 +11,7 @@ const postsCollection = defineCollection({
 		tags: z.array(z.string()).optional().default([]),
 		category: z.string().optional().nullable().default(""),
 		lang: z.string().optional().default(""),
+		archived: z.boolean().default(false).optional(), // 确保这一行存在
 
 		/* For internal use */
 		prevTitle: z.string().default(""),
