@@ -45,7 +45,7 @@ fontFamily: 'normal'
 
 
 <figure style="max-width: 200px; margin: 0 auto; text-align: center;">
-  <img src="\src\content\spec\image\about\1777115659229.png" alt="我是半MTF" style="width: 100%;" />
+  <img src="/posts/about/images/trans.png" alt="我是半MTF" style="width: 100%;" />
   <figcaption>看，我是半MTF(好耶)</figcaption>
 </figure>
 
