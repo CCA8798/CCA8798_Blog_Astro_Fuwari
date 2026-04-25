@@ -1,12 +1,35 @@
 @tailwind components;
 
+
+/*杨仁东竹石体*/
+@font-face {
+  font-family: 'YangRenDongZhuShiTi Semibold';
+  src: url('../assets/fonts/YangRenDongZhuShiTi-Semibold.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'YouSheYuFeiTeJianKangTi-2';
+  src: url('../assets/fonts/YouSheYuFeiTeJianKangTi-2.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer components {
     .card-base {
         @apply rounded-[var(--radius-large)] overflow-hidden bg-[var(--card-bg)] transition;
+        font-family: 'YangRenDongZhuShiTi Semibold', serif;
+        font-size: 130%;
     }
+
     h1, h2, h3, h4, h5, h6, p, a, span, li, ul, ol, blockquote, code, pre, table, th, td, strong {
         @apply transition;
+        letter-spacing: 1px;
+        font-size: 110%;
     }
+
     .card-shadow {
         @apply drop-shadow-[0_2px_4px_rgba(0,0,0,0.005)]
     }
@@ -53,6 +76,7 @@
     .btn-regular {
         @apply transition flex items-center justify-center bg-[var(--btn-regular-bg)] hover:bg-[var(--btn-regular-bg-hover)] active:bg-[var(--btn-regular-bg-active)]
         text-[var(--btn-content)] dark:text-white/75
+        /* font-size: 150%; */
     }
 
     .link-underline {
@@ -157,4 +181,16 @@
   margin-right: auto;
   max-width: 50%;
   height: auto;
+}
+
+#navbar-wrapper {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0;
+  right: 0;
+  z-index: 50;
+}
+/* 补偿高度：4.5rem 即为导航栏高度 */
+body {
+  padding-top: 4.5rem;
 }

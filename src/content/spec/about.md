@@ -1,3 +1,6 @@
+---
+fontFamily: 'normal'
+---
 <div style="display: flex; align-items: center; justify-content: center;">
   <span style="flex: 1; border-bottom: 5px double #000; margin: 0 10px;"></span>
   <h1 style="margin: 0 10px;">关于</h1>
@@ -18,6 +21,8 @@
 半MTF🍥药娘<br>
 ***HRT：***
 含糖<br>
+***出厂日期：***
+2012/01/03<br>
 ***身高/体重：***
 165cm/41kg<br>
 ***出生地&居住地：***
@@ -58,7 +63,7 @@
 
 **内容分发**
 
-除另有标注外，本站所有内容均以CC-BY-SA-NC 4.0协议进行分发
+除另有标注外，本站所有内容均以CC BY-NC-SA 4.0协议进行分发
 
 > ### 本站使用的资源
 >

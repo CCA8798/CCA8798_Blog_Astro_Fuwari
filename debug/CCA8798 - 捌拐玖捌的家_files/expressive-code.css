@@ -1,0 +1,6 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/styles/expressive-code.css");import { updateStyle as __vite__updateStyle, removeStyle as __vite__removeStyle } from "/@vite/client"
+const __vite__id = "F:/Web/Nodejs/Projects/CCA8798_Blog_Astro_Fuwari/src/styles/expressive-code.css"
+const __vite__css = ".expressive-code .frame {\n        --tw-shadow: 0 0 #0000 !important;\n        --tw-shadow-colored: 0 0 #0000 !important;\n        box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) !important;\n}\n    .expressive-code .title {\n        font-family: \"JetBrains Mono Variable\", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace;\n    }\n"
+__vite__updateStyle(__vite__id, __vite__css)
+import.meta.hot.accept()
+import.meta.hot.prune(() => __vite__removeStyle(__vite__id))
