@@ -18,19 +18,44 @@ async function getRawSortedPosts() {
 }
 
 export async function getSortedPosts() {
-	const sorted = await getRawSortedPosts();
+  const allBlogPosts = await getCollection("posts", ({ data }) => {
+    // 使用类型断言告诉 TypeScript data 有 draft 属性
+    return (data as any).draft !== true;
+  });
+  
+  // 添加过滤逻辑，排除归档文章
+  const filteredPosts = allBlogPosts.filter(post => {
+    // 使用可选属性访问和类型守卫
+    return !('archived' in post.data && post.data.archived === true);
+  });
 
-	for (let i = 1; i < sorted.length; i++) {
-		sorted[i].data.nextSlug = sorted[i - 1].slug;
-		sorted[i].data.nextTitle = sorted[i - 1].data.title;
-	}
-	for (let i = 0; i < sorted.length - 1; i++) {
-		sorted[i].data.prevSlug = sorted[i + 1].slug;
-		sorted[i].data.prevTitle = sorted[i + 1].data.title;
-	}
-
-	return sorted;
+  return filteredPosts.sort((a, b) => {
+    // 使用类型断言告诉 TypeScript data 有 published 属性
+    const dateA = new Date((a.data as any).published);
+    const dateB = new Date((b.data as any).published);
+    return dateB.getTime() - dateA.getTime();
+  });
 }
+
+
+
+
+// export async function getSortedPosts() {
+// 	const sorted = await getRawSortedPosts();
+
+	
+
+// 	for (let i = 1; i < sorted.length; i++) {
+// 		sorted[i].data.nextSlug = sorted[i - 1].slug;
+// 		sorted[i].data.nextTitle = sorted[i - 1].data.title;
+// 	}
+// 	for (let i = 0; i < sorted.length - 1; i++) {
+// 		sorted[i].data.prevSlug = sorted[i + 1].slug;
+// 		sorted[i].data.prevTitle = sorted[i + 1].data.title;
+// 	}
+
+// 	return sorted;
+// }
 export type PostForList = {
 	slug: string;
 	data: CollectionEntry<"posts">["data"];
