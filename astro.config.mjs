@@ -6,7 +6,6 @@ import { pluginLineNumbers } from "@expressive-code/plugin-line-numbers";
 import swup from "@swup/astro";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
-import { defineConfig } from "astro/config";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeComponents from "rehype-components"; /* Render the custom directive content */
 import rehypeKatex from "rehype-katex";
@@ -26,6 +25,7 @@ import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-cop
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { defineConfig, fontProviders } from "astro/config";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -61,10 +61,10 @@ export default defineConfig({
 		}),
 		icon({
 			include: {
-				"preprocess: vitePreprocess(),": ["*"],
-				"fa6-brands": ["*"],
-				"fa6-regular": ["*"],
-				"fa6-solid": ["*"],
+				// "preprocess: vitePreprocess(),": ["*"],
+				// "fa6-brands": ["*"],
+				// "fa6-regular": ["*"],
+				// "fa6-solid": ["*"],
 			},
 		}),
 		expressiveCode({
