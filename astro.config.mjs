@@ -41,6 +41,18 @@ export default defineConfig({
 			cert: fs.readFileSync(path.resolve(__dirname, 'ssl/crt.crt')),
 		},
 	},
+	fonts: [{
+    provider: fontProviders.local(),
+    name: "YangRenDongZhuShiTi-Semibold",
+    cssVariable: "--YangRenDongZhuShiTi-Semibold",
+    options: {
+      variants: [{
+        src: ['./src/assets/fonts/YangRenDongZhuShiTi-Semibold.woff2'],
+        weight: 'normal',
+        style: 'normal'
+      }]
+    }
+  }],
 	integrations: [
 		tailwind({
 			nesting: true,
