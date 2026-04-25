@@ -28,6 +28,7 @@ interface Props {
 	setOGTypeArticle?: boolean;
 }
 
+
 let { title, banner, description, lang, setOGTypeArticle } = Astro.props;
 
 // apply a class to the body element to decide the height of the banner, only used for initial page load
@@ -77,7 +78,6 @@ const bannerOffset =
 	  data-overlayscrollbars-initialize
 >
 	<head>
-
 		<title>{pageTitle}</title>
 
 		<meta charset="UTF-8" />
@@ -151,9 +151,8 @@ const bannerOffset =
 	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
 		  data-overlayscrollbars-initialize
 	>
-		<ConfigCarrier></ConfigCarrier>
+		<ConfigCarrier></ConfigCarrier>\
 		<slot />
-
 		<!-- increase the page height during page transition to prevent the scrolling animation from jumping -->
 		<div id="page-height-extend" class="hidden h-[300vh]"></div>
 	</body>
