@@ -5,34 +5,37 @@ import { getCategoryUrl } from "@utils/url-utils.ts";
 
 // // Retrieve posts and sort them by publication date
 async function getRawSortedPosts() {
-	const allBlogPosts = await getCollection("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
-	});
-
-	const sorted = allBlogPosts.sort((a, b) => {
-		const dateA = new Date(a.data.published);
-		const dateB = new Date(b.data.published);
-		return dateA > dateB ? -1 : 1;
-	});
-	return sorted;
+  const allBlogPosts = await getCollection("posts", ({ data }) => {
+    return import.meta.env.PROD ? data.draft !== true : true;
+  });
+  
+  const sorted = allBlogPosts.sort((a, b) => {
+    // 使用Date对象解析ISO格式时间
+    const dateA = new Date(a.data.published);
+    const dateB = new Date(b.data.published);
+    
+    // 使用getTime()获取毫秒级时间戳进行精确比较
+    return dateB.getTime() - dateA.getTime();
+  });
+  
+  return sorted;
 }
 
 export async function getSortedPosts() {
   const allBlogPosts = await getCollection("posts", ({ data }) => {
-    // 使用类型断言告诉 TypeScript data 有 draft 属性
     return (data as any).draft !== true;
   });
   
-  // 添加过滤逻辑，排除归档文章
   const filteredPosts = allBlogPosts.filter(post => {
-    // 使用可选属性访问和类型守卫
     return !('archived' in post.data && post.data.archived === true);
   });
-
+  
   return filteredPosts.sort((a, b) => {
-    // 使用类型断言告诉 TypeScript data 有 published 属性
+    // 使用Date对象解析ISO格式时间，确保精确到分钟
     const dateA = new Date((a.data as any).published);
     const dateB = new Date((b.data as any).published);
+    
+    // 使用getTime()获取毫秒级时间戳进行精确比较
     return dateB.getTime() - dateA.getTime();
   });
 }
