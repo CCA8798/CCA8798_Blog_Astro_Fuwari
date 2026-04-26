@@ -8,6 +8,9 @@ category: 杂谈
 draft: false
 archived: false
 ---
+### 关于我
+有关详细信息，请查看[关于](/about/)页面
+
 ### 关于本站
 
 > - 本站是CCA8798(以下称“站长”)的个人博客，基于Astro框架和Fuwari模版，经站长修改后发布。
