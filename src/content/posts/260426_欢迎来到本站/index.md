@@ -1,6 +1,7 @@
 ---
 title: 泥嚎！欢迎来到本站
-published: 2026-04-26
+published: 2026-04-26T04:30:00+08:00
+
 description: "关于本站的一些信息"
 image: "./3.png"
 tags: ["杂谈"]
