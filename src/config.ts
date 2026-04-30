@@ -45,6 +45,11 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.Archive,
 		LinkPreset.About,
 		{
+			name: "抽奖",
+			url: "https://www.cca8798.com/lotteryTimes", // Internal links should not include the base path, as it is automatically added
+			external: true, // Show an external link icon and will open in a new tab
+		},
+		{
 			name: "B站主页",
 			url: "https://space.bilibili.com/688231358", // Internal links should not include the base path, as it is automatically added
 			external: true, // Show an external link icon and will open in a new tab
