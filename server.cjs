@@ -7,7 +7,7 @@ app.use(express.static(path.join(__dirname, 'dist')));
 
 app.get('/api/status.json', (req, res) => {
     try {
-        const jsonPath = path.join(__dirname, 'public/lotteryTimes/list.json'); // 与 server.cjs 同目录
+        const jsonPath = path.join(__dirname, 'list.json'); // 与 server.cjs 同目录
         const rawData = fs.readFileSync(jsonPath, 'utf-8');
         const jsonData = JSON.parse(rawData);
         res.json(jsonData);  // 自动设 Content-Type: application/json
