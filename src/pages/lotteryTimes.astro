@@ -1,0 +1,91 @@
+---
+// src/pages/dashboard.astro
+
+import { getEntry, render } from "astro:content";
+import Markdown from "@components/misc/Markdown.astro";
+import I18nKey from "../i18n/i18nKey";
+import { i18n } from "../i18n/translation";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+
+---
+
+<MainGridLayout title="Dashboard - 实时数据">
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+        <div class="card-base z-10 px-9 py-6 relative w-full">
+            <h1 class="text-3xl font-bold mb-8 text-center">🍥五一抽奖の名单🍥</h1>
+            <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-4 text-center">开奖时间：2026/05/01 23:30(UTC+8)<br>❤️感谢有您❤️</h3>
+            <Markdown class="prose dark:prose-invert max-w-none">
+    
+            <!-- 数据容器 -->
+            <div id="names-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <p class="text-gray-500 col-span-full text-center">正在加载名单...</p>
+            </div>
+
+            <p class="text-xs text-gray-400 text-center mt-8">
+            数据每 2 分钟自动fetch一次<br>
+            由于数据需要人工修改，故该页面显示的名单可能会有延迟
+            </p>
+            </Markdown>
+        </div>
+    </div>
+</MainGridLayout>
+
+<script>
+function renderNames(names) {
+  const container = document.getElementById('names-container');
+  if (!container) return;
+
+  if (!Array.isArray(names) || names.length === 0) {
+    container.innerHTML = '<p class="text-gray-500 col-span-full text-center">当前没有名单数据</p>';
+    return;
+  }
+
+  container.innerHTML = names.map((name, index) => {
+    // 去掉开头的 @ 符号，得到纯用户名
+    const username = name.startsWith('@') ? name.slice(1) : name;
+    const profileUrl = `https://x.com/${encodeURIComponent(username)}`;
+    
+    return `
+      <a href="${profileUrl}" target="_blank" rel="noopener noreferrer"
+         class="bg-white dark:bg-gray-800 shadow-md rounded-xl p-6 flex items-center justify-between 
+                border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all 
+                hover:border-blue-400 dark:hover:border-blue-500 group cursor-pointer">
+        <span class="text-2xl font-mono text-gray-300 dark:text-gray-600 mr-4">#${index + 1}</span>
+        <span class="text-xl font-semibold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          @${escapeHtml(username)}
+        </span>
+        <svg class="w-5 h-5 ml-2 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
+      </a>
+    `;
+  }).join('');
+}
+
+  // 防止 XSS（虽然 JSON 数据应该是安全的，但保留好习惯）
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(text));
+    return div.innerHTML;
+  }
+
+  async function fetchData() {
+    try {
+      const response = await fetch('/api/status.json');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      renderNames(data);   // 直接传入数组
+    } catch (error) {
+      console.error('获取名单失败:', error);
+      const container = document.getElementById('names-container');
+      if (container) {
+        container.innerHTML = '<p class="text-red-500 col-span-full text-center">⚠️ 数据加载失败，请稍后再试</p>';
+      }
+    }
+  }
+
+  // 页面加载时立刻拉取一次
+  document.addEventListener('DOMContentLoaded', fetchData);
+  // 每 2 分钟刷新一次
+  setInterval(fetchData, 120000);
+</script>
