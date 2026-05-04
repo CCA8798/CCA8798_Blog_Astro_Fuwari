@@ -6,6 +6,7 @@ description: "关于本站的一些信息"
 image: "./3.png"
 tags: ["杂谈"]
 category: 杂谈
+showCover: true
 draft: false
 archived: false
 ---
