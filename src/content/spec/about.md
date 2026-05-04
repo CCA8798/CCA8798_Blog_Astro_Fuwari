@@ -57,6 +57,14 @@ fontFamily: 'normal'
 这是一坨显而易见的垃圾代码
 ::github{repo="CCA8798/ConsoleInQt"}
 :::
+
+**C++项目**
+
+:::tip
+一个没有难度的项目 打算迁移到Qt Fluent
+::github{repo="CCA8798/Simple_ID_Lottery"}
+:::
+
 <div style="display: flex; align-items: center; justify-content: center;">
   <span style="flex: 1; border-bottom: 1px dashed #000; margin: 0 10px;"></span>
   <h2 style="margin: 0 10px;">关于本站</h2>
