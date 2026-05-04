@@ -12,6 +12,7 @@ const postsCollection = defineCollection({
 		category: z.string().optional().nullable().default(""),
 		lang: z.string().optional().default(""),
 		archived: z.boolean().default(false).optional(), // 确保这一行存在
+		showCover: z.boolean().default(false).optional(),  // 添加这一行
 
 		/* For internal use */
 		prevTitle: z.string().default(""),
