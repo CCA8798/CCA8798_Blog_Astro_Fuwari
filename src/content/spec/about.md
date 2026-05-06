@@ -48,7 +48,7 @@ MTF/X🍥<br>
 
 <figure style="max-width: 200px; margin: 0 auto; text-align: center;">
   <Image src="/posts/about/images/trans.png" alt="我是半MTF" style="width: 100%;" />
-  <figcaption>看，我是半MTF(好耶)</figcaption>
+  <figcaption>看，我是MTF/X(好耶)</figcaption>
 </figure>
 
 ![1777114292190](image/about/1777114292190.png)
