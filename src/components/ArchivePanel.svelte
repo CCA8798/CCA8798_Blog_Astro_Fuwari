@@ -20,7 +20,7 @@ interface Post {
 		title: string;
 		tags: string[];
 		category?: string;
-		published: Date;
+		published: Date | string;
 	};
 }
 
@@ -31,9 +31,10 @@ interface Group {
 
 let groups: Group[] = [];
 
-function formatDate(date: Date) {
-	const month = (date.getMonth() + 1).toString().padStart(2, "0");
-	const day = date.getDate().toString().padStart(2, "0");
+function formatDate(date: Date | string) {
+	const d = typeof date === 'string' ? new Date(date) : date;
+	const month = (d.getMonth() + 1).toString().padStart(2, "0");
+	const day = d.getDate().toString().padStart(2, "0");
 	return `${month}-${day}`;
 }
 
@@ -64,7 +65,8 @@ onMount(async () => {
 
 	const grouped = filteredPosts.reduce(
 		(acc, post) => {
-			const year = post.data.published.getFullYear();
+			const d = typeof post.data.published === 'string' ? new Date(post.data.published) : post.data.published;
+			const year = d.getFullYear();
 			if (!acc[year]) {
 				acc[year] = [];
 			}

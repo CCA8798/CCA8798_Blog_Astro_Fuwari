@@ -43,6 +43,38 @@ const mainPanelTop = siteConfig.banner.enable
 
 <Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle}>
 
+<!-- 背景粒子特效 -->
+<div id="bg-particles" aria-hidden="true">
+  {[
+    { l: 5, s: 5, d: 0, du: 22 }, { l: 15, s: 7, d: 3, du: 26 }, { l: 25, s: 4, d: 6, du: 20 },
+    { l: 35, s: 8, d: 2, du: 28 }, { l: 45, s: 3, d: 8, du: 24 }, { l: 55, s: 6, d: 5, du: 22 },
+    { l: 65, s: 5, d: 10, du: 26 }, { l: 75, s: 7, d: 4, du: 20 }, { l: 85, s: 4, d: 12, du: 28 },
+    { l: 92, s: 6, d: 7, du: 24 }, { l: 10, s: 4, d: 14, du: 22 }, { l: 30, s: 6, d: 9, du: 26 },
+    { l: 50, s: 5, d: 1, du: 20 }, { l: 70, s: 8, d: 11, du: 28 }, { l: 88, s: 3, d: 15, du: 24 },
+    { l: 20, s: 5, d: 18, du: 26 }, { l: 60, s: 7, d: 13, du: 22 }, { l: 80, s: 4, d: 16, du: 28 },
+  ].map(p => (
+    <span class="dot" style={`left:${p.l}%;width:${p.s}px;height:${p.s}px;animation-delay:${p.d}s;animation-duration:${p.du}s;top:${Math.random()*80+10}%`}></span>
+  ))}
+  {[
+    { l: 8, d: 0, du: 3 }, { l: 22, d: 1.5, du: 4 }, { l: 38, d: 0.8, du: 3.5 },
+    { l: 52, d: 2.5, du: 4.5 }, { l: 68, d: 1, du: 3 }, { l: 82, d: 3, du: 4 },
+    { l: 95, d: 2, du: 3.5 }, { l: 15, d: 4, du: 4.5 },
+  ].map(p => (
+    <span class="star" style={`left:${p.l}%;top:${Math.random()*80+10}%;animation-delay:${p.d}s;animation-duration:${p.du}s`}></span>
+  ))}
+  {[
+    { l: 30, d: 0.5, du: 4 }, { l: 48, d: 2, du: 3.5 }, { l: 72, d: 1.2, du: 4.5 },
+    { l: 12, d: 3.5, du: 3 }, { l: 88, d: 2.8, du: 4 },
+  ].map(p => (
+    <span class="accent-star" style={`left:${p.l}%;top:${Math.random()*80+10}%;animation-delay:${p.d}s;animation-duration:${p.du}s`}></span>
+  ))}
+  {[
+    { l: 90, t: 5, d: 0, du: 6 }, { l: 70, t: 15, d: 8, du: 5 },
+  ].map(p => (
+    <span class="shooting-star" style={`left:${p.l}%;top:${p.t}%;animation-delay:${p.d}s;animation-duration:${p.du}s`}></span>
+  ))}
+</div>
+
 <!-- Navbar -->
 <slot slot="head" name="head"></slot>
 <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto" class:list={[""]}>

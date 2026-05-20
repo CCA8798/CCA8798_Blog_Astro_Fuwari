@@ -165,6 +165,10 @@ const bannerOffset =
 }}>
 @tailwind components;
 @layer components {
+	#banner-wrapper {
+		mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+		-webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+	}
 	.enable-banner.is-home #banner-wrapper {
 		@apply h-[var(--banner-height-home)] translate-y-[var(--banner-height-extend)]
 	}
