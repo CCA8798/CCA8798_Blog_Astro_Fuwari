@@ -52,6 +52,7 @@ let links: NavBarLink[] = navBarConfig.links.map(
                     </button>
             )}
             <LightDarkSwitch client:only="svelte"></LightDarkSwitch>
+            <div id="auth-nav-container"></div>
             <button aria-label="Menu" name="Nav Menu" class="btn-plain scale-animation rounded-lg w-11 h-11 active:scale-90 md:!hidden" id="nav-menu-switch">
                 <Icon name="material-symbols:menu-rounded" class="text-[1.25rem]"></Icon>
             </button>
@@ -102,6 +103,60 @@ function loadButtonScript() {
 }
 
 loadButtonScript();
+
+function renderAuthNav() {
+    const container = document.getElementById("auth-nav-container");
+    if (!container) return;
+
+    const token = localStorage.getItem("token");
+    const userStr = localStorage.getItem("user");
+
+    if (token && userStr) {
+        try {
+            const user = JSON.parse(userStr);
+            container.innerHTML = `
+                <a href="/admin/" class="btn-plain scale-animation rounded-lg h-9 w-9 active:scale-90 flex items-center justify-center" title="后台管理">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </a>
+                <a href="/" class="btn-plain scale-animation rounded-lg h-9 px-2 text-sm font-bold active:scale-95 flex items-center gap-1" id="auth-user-btn" title="${user.display_name || user.username}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <span class="hidden lg:inline">${user.display_name || user.username}</span>
+                </a>
+                <button id="logout-btn" class="btn-plain scale-animation rounded-lg h-9 w-9 active:scale-90 flex items-center justify-center" title="退出登录">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                </button>
+            `;
+
+            const logoutBtn = document.getElementById("logout-btn");
+            if (logoutBtn) {
+                logoutBtn.onclick = function () {
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("user");
+                    window.location.href = "/login/";
+                };
+            }
+        } catch {
+            renderLoginLinks(container);
+        }
+    } else {
+        renderLoginLinks(container);
+    }
+}
+
+function renderLoginLinks(container: HTMLElement) {
+    container.innerHTML = `
+        <div class="flex items-center gap-2">
+            <a href="/login/" class="btn-plain scale-animation rounded-lg h-9 px-2 text-sm font-bold active:scale-95">登录</a>
+            <a href="/register/" class="btn-regular scale-animation rounded-lg h-9 px-3 text-sm font-bold active:scale-95">注册</a>
+        </div>
+    `;
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", renderAuthNav);
+} else {
+    renderAuthNav();
+}
 </script>
 
 {import.meta.env.PROD && <script is:inline define:vars={{scriptUrl: url('/pagefind/pagefind.js')}}>

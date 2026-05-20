@@ -11,8 +11,9 @@ const postsCollection = defineCollection({
 		tags: z.array(z.string()).optional().default([]),
 		category: z.string().optional().nullable().default(""),
 		lang: z.string().optional().default(""),
-		archived: z.boolean().default(false).optional(), // 确保这一行存在
-		showCover: z.boolean().default(false).optional(),  // 添加这一行
+		archived: z.boolean().default(false).optional(),
+		showCover: z.boolean().default(false).optional(),
+		author: z.string().optional().default("CCA8798"),
 
 		/* For internal use */
 		prevTitle: z.string().default(""),

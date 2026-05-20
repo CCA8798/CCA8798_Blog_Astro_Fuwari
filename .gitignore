@@ -26,6 +26,10 @@ package-lock.json
 bun.lockb
 yarn.lock
 
+# server data (SQLite database)
+data/
+!data/.gitkeep
+
 # ide
 .idea
 *.iml

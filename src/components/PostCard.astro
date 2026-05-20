@@ -20,6 +20,7 @@ interface Props {
 	image: string;
 	description: string;
 	draft: boolean;
+	author: string;
 	style: string;
 }
 const {
@@ -32,6 +33,7 @@ const {
 	category,
 	image,
 	description,
+	author,
 	style,
 } = Astro.props;
 const className = Astro.props.class;
@@ -62,6 +64,12 @@ const { remarkPluginFrontmatter } = await entry.render();
         <!-- description -->
         <div class:list={["transition text-75 mb-3.5 pr-4", {"line-clamp-2 md:line-clamp-1": !description}]}>
             { description || remarkPluginFrontmatter.excerpt }
+        </div>
+
+        <!-- author -->
+        <div class="flex items-center gap-2 text-sm text-50 mb-2.5 transition">
+            <Icon name="material-symbols:person-outline-rounded" class="text-[1.1rem]"></Icon>
+            <span class="font-medium">{author}</span>
         </div>
 
         <!-- word count and read time  -->
