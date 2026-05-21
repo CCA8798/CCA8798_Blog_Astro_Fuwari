@@ -19,9 +19,20 @@
 
 @layer components {
     .card-base {
-        @apply rounded-[var(--radius-large)] overflow-hidden bg-[var(--card-bg)] transition;
+        @apply rounded-[var(--radius-large)] bg-[var(--card-bg)] transition;
         font-family: 'YangRenDongZhuShiTi Semibold', serif;
         font-size: 130%;
+    }
+    .card-base:hover {
+        box-shadow: 0 0 0 1px oklch(0.70 0.14 var(--hue) / 0.35),
+                    0 0 32px oklch(0.70 0.14 var(--hue) / 0.25),
+                    0 0 64px oklch(0.70 0.14 var(--hue) / 0.10);
+        transform: translateY(-3px);
+    }
+    .dark .card-base:hover {
+        box-shadow: 0 0 0 1px oklch(0.75 0.14 var(--hue) / 0.30),
+                    0 0 36px oklch(0.75 0.14 var(--hue) / 0.20),
+                    0 0 72px oklch(0.75 0.14 var(--hue) / 0.10);
     }
 
     h1, h2, h3, h4, h5, h6, p, a, span, li, ul, ol, blockquote, code, pre, table, th, td, strong {
