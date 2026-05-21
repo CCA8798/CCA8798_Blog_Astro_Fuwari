@@ -5,9 +5,6 @@ const app = express();
 
 const STATUS_FILE = path.join(__dirname, 'status.json');
 
-// 托管 dist 目录下的所有静态文件
-app.use(express.static(path.join(__dirname, 'dist')));
-
 app.get('/api/status.json', (req, res) => {
     try {
         const jsonPath = path.join(__dirname, 'list.json');
@@ -60,6 +57,9 @@ app.get('/api/status', (req, res) => {
 app.get('/api/status/update', (req, res) => {
     res.redirect(301, '/api/status?' + new URLSearchParams(req.query).toString());
 });
+
+// 静态文件（放在 API 路由之后，避免拦截 /api/ 请求）
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // SPA 回退：所有非静态文件请求都返回 index.html
 app.get('/{*path}', (req, res) => {
