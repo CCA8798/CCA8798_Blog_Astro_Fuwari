@@ -1,0 +1,139 @@
+---
+// Background particle effect for homepage
+---
+
+<canvas id="bg-particles" aria-hidden="true"></canvas>
+
+<style is:global>
+  #bg-particles {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    @apply opacity-60 dark:opacity-40;
+  }
+</style>
+
+<script>
+(function () {
+  const el = document.getElementById("bg-particles");
+  if (!(el instanceof HTMLCanvasElement)) return;
+  const canvas = el;
+  const ctx = canvas.getContext("2d");
+
+  let running = false;
+  const COUNT = 80;
+
+  function isHomePage() {
+    const path = window.location.pathname.replace(/\/+$/, "");
+    return path === "" || /^\/page(\/\d+)?\/?$/.test(path);
+  }
+
+  function getHue() {
+    return (
+      parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--hue"),
+      ) || 15
+    );
+  }
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  function createParticle() {
+    return {
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 3 + 1.2,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.35,
+      opacity: Math.random() * 0.4 + 0.2,
+    };
+  }
+
+  let particles = Array.from({ length: COUNT }, createParticle);
+
+  function initParticles() {
+    particles = Array.from({ length: COUNT }, createParticle);
+  }
+
+  function drawConnections(hue = 0) {
+    if (!ctx) return;
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 200) {
+          const o = (1 - dist / 200) * 0.2;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `oklch(0.70 0.12 ${hue} / ${o})`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function animate() {
+    if (!running) {
+      if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+      requestAnimationFrame(animate);
+      return;
+    }
+    const hue = getHue();
+    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const p of particles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < -10 || p.x > canvas.width + 10) p.vx *= -1;
+      if (p.y < -10 || p.y > canvas.height + 10) p.vy *= -1;
+      if (ctx) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `oklch(0.70 0.16 ${hue} / ${p.opacity})`;
+        ctx.fill();
+      }
+    }
+    drawConnections(hue);
+    requestAnimationFrame(animate);
+  }
+
+  function start() {
+    if (!running) {
+      running = true;
+      initParticles();
+      resize();
+    }
+  }
+
+  function stop() {
+    running = false;
+  }
+
+  if (isHomePage()) start();
+
+  function setupSwupHooks() {
+    if (!window.swup) return;
+    window.swup.hooks.on("page:view", () => {
+      if (isHomePage()) start();
+      else stop();
+    });
+  }
+  if (window.swup) {
+    setupSwupHooks();
+  } else {
+    document.addEventListener("swup:enable", setupSwupHooks);
+  }
+
+  animate();
+})();
+</script>
