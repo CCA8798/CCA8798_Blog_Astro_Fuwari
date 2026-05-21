@@ -20,8 +20,30 @@ app.get('/api/status.json', (req, res) => {
     }
 });
 
-// 获取当前状态
-app.get('/api/status', (_req, res) => {
+// 状态 API：GET /api/status → 读取；GET /api/status?text=xxx&token=yyy → 更新
+app.get('/api/status', (req, res) => {
+    const textParam = req.query.text;
+
+    // 更新模式
+    if (textParam !== undefined) {
+        const token = process.env.STATUS_TOKEN;
+        if (token && req.query.token !== token) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        const text = String(textParam).trim();
+        const status = { text, updatedAt: new Date().toISOString() };
+
+        try {
+            fs.writeFileSync(STATUS_FILE, JSON.stringify(status, null, 2), 'utf-8');
+            return res.json({ success: true, status });
+        } catch (err) {
+            console.error('写入 status.json 失败:', err);
+            return res.status(500).json({ error: 'Failed to save status' });
+        }
+    }
+
+    // 读取模式
     try {
         let status = { text: '', updatedAt: null };
         if (fs.existsSync(STATUS_FILE)) {
@@ -34,24 +56,9 @@ app.get('/api/status', (_req, res) => {
     }
 });
 
-// 更新状态 (GET 方便浏览器直接访问)
-// 用法: /api/status/update?text=xxx&token=xxx
+// 兼容旧版：/api/status/update?text=xxx&token=yyy
 app.get('/api/status/update', (req, res) => {
-    const token = process.env.STATUS_TOKEN;
-    if (token && req.query.token !== token) {
-        return res.status(401).json({ error: 'Invalid token' });
-    }
-
-    const text = String(req.query.text || '').trim();
-    const status = { text, updatedAt: new Date().toISOString() };
-
-    try {
-        fs.writeFileSync(STATUS_FILE, JSON.stringify(status, null, 2), 'utf-8');
-        res.json({ success: true, status });
-    } catch (err) {
-        console.error('写入 status.json 失败:', err);
-        res.status(500).json({ error: 'Failed to save status' });
-    }
+    res.redirect(301, '/api/status?' + new URLSearchParams(req.query).toString());
 });
 
 // SPA 回退：所有非静态文件请求都返回 index.html
