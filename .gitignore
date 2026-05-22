@@ -31,3 +31,8 @@ yarn.lock
 *.iml
 # server.cjs
 status.json
+
+# admin
+rate-limit.json
+admin-session.json
+admin-config.json

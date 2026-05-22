@@ -6,8 +6,8 @@
     "dev": "astro dev",
     "start": "astro dev",
     "check": "astro check",
-    "build": "astro build && pagefind --site dist",
-    "postbuild": "node -e \"require('fs').rmSync('dist/api',{recursive:true,force:true})\"",
+    "build": "astro build && pagefind --site dist/client",
+    "postbuild": "node -e \"require('fs').rmSync('dist/client/api',{recursive:true,force:true})\"",
     "preview": "astro preview",
     "astro": "astro",
     "type-check": "tsc --noEmit --isolatedDeclarations",
@@ -19,6 +19,7 @@
   "dependencies": {
     "@astrojs/check": "^0.9.9",
     "@astrojs/mdx": "^5.0.4",
+    "@astrojs/node": "^9",
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.2",
     "@astrojs/svelte": "7.2.5",
