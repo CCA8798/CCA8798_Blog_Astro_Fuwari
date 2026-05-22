@@ -31,3 +31,10 @@ yarn.lock
 *.iml
 # server.cjs
 status.json
+
+# admin
+admin-session.json
+admin-config.json
+
+#build
+build/
