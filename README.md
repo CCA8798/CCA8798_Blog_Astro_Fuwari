@@ -228,4 +228,6 @@ git status   # 确认只暂存了目标文件
 
 ## 📄 License
 
-本项目基于 Fuwari 模板构建，遵循 MIT License。
+- **源代码**（`src/`、`server.cjs`、`astro.config.mjs` 等）：基于 [Fuwari](https://github.com/saicaca/fuwari) 模板构建，遵循 **MIT License**。
+- **文章内容**（`src/content/posts/`）：遵循 **CC BY-NC-SA 4.0**（署名—非商业性使用—相同方式共享）。
+- **头像与品牌标识**：保留所有权利。
