@@ -1,5 +1,11 @@
 @tailwind components;
 
+/* Holographic spinning border for status-history page */
+@property --holo-angle {
+	syntax: "<angle>";
+	inherits: false;
+	initial-value: 0deg;
+}
 
 /*杨仁东竹石体*/
 @font-face {
@@ -33,6 +39,47 @@
         box-shadow: 0 0 0 1px oklch(0.75 0.14 var(--hue) / 0.30),
                     0 0 36px oklch(0.75 0.14 var(--hue) / 0.20),
                     0 0 72px oklch(0.75 0.14 var(--hue) / 0.10);
+    }
+
+    /* === Holographic card (status history page) === */
+    .card-base-holo {
+        position: relative;
+        isolation: isolate;
+        overflow: visible !important;
+    }
+    .card-base-holo::before {
+        content: "";
+        position: absolute;
+        inset: -1.5px;
+        border-radius: calc(var(--radius-large) + 1.5px);
+        background: conic-gradient(
+            from var(--holo-angle, 0deg),
+            color-mix(in srgb, var(--primary) 50%, transparent) 0deg,
+            oklch(0.70 0.08 calc(var(--hue) + 60) / 0.4) 120deg,
+            oklch(0.70 0.08 calc(var(--hue) + 180) / 0.4) 240deg,
+            color-mix(in srgb, var(--primary) 50%, transparent) 360deg
+        );
+        z-index: -1;
+        animation: holoSpin 12s linear infinite;
+        pointer-events: none;
+        padding: 1.5px;
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask-composite: exclude;
+    }
+    .card-base-holo:hover {
+        transform: translateY(-3px) !important;
+        box-shadow:
+            0 0 0 1px oklch(0.70 0.14 var(--hue) / 0.40),
+            0 0 24px oklch(0.70 0.14 var(--hue) / 0.25),
+            0 0 48px oklch(0.70 0.14 calc(var(--hue) + 60) / 0.12);
+    }
+    .dark .card-base-holo:hover {
+        box-shadow:
+            0 0 0 1px oklch(0.75 0.14 var(--hue) / 0.35),
+            0 0 28px oklch(0.75 0.14 var(--hue) / 0.20),
+            0 0 56px oklch(0.75 0.14 calc(var(--hue) + 60) / 0.10);
     }
 
     h1, h2, h3, h4, h5, h6, p, a, span, li, ul, ol, blockquote, code, pre, table, th, td, strong {
@@ -205,3 +252,8 @@
 body {
   padding-top: 4.5rem;
 }
+
+@keyframes holoSpin {
+	to { --holo-angle: 360deg; }
+}
+
