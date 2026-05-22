@@ -8,6 +8,7 @@ import tailwind from "@astrojs/tailwind";
 import { pluginCollapsibleSections } from "@expressive-code/plugin-collapsible-sections";
 import { pluginLineNumbers } from "@expressive-code/plugin-line-numbers";
 import swup from "@swup/astro";
+import node from "@astrojs/node";
 import { defineConfig, fontProviders } from "astro/config";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
@@ -36,6 +37,7 @@ export default defineConfig({
 	base: "/",
 	trailingSlash: "ignore",
 	server: {
+		port: 4321,
 		allowedHosts: ["home.cca8798.com", "www.cca8798.com"], // 将 'your-hostname.com' 替换为你要允许的主机名
 		https: {
 			key: fs.readFileSync(path.resolve(__dirname, "ssl/key.key")),
@@ -184,6 +186,7 @@ export default defineConfig({
 			],
 		],
 	},
+	adapter: node({ mode: "standalone" }),
 	vite: {
 		build: {
 			rollupOptions: {
