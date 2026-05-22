@@ -33,6 +33,7 @@ yarn.lock
 status.json
 
 # admin
+rate-limit.json
 admin-session.json
 admin-config.json
 
