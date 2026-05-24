@@ -87,11 +87,10 @@ function timeAgo(iso: string): string {
 	{:else}
 		<div class="timeline-track"></div>
 		{#each grouped as day, di}
-			<div class="day-group" style="animation-delay: {di * 0.1}s">
+			<div class="day-group" style="animation-delay: {di * 0.15}s">
 				<div class="day-header">{day.date}</div>
 				{#each day.entries as entry, ei}
-					{@const idx = di * 999 + ei}
-					<div class="tl-item" style="animation-delay: {idx * 0.05}s">
+					<div class="tl-item" style="animation-delay: {di * 0.15 + ei * 0.06}s">
 						<div class="tl-dot"></div>
 						<div class="tl-body">
 							<div class="tl-meta">
