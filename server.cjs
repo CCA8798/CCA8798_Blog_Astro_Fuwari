@@ -13,7 +13,20 @@ const MAX_HISTORY = 200;
 const MAX_ATTEMPTS = 3;
 const RATE_WINDOW_MS = 30 * 60 * 1000;
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'lin20120103';
+function loadAdminPasswords() {
+	const envVal = process.env.ADMIN_PASSWORD;
+	if (envVal) return envVal.split(',').map(s => s.trim()).filter(Boolean);
+	try {
+		const configPath = path.join(__dirname, 'admin-config.json');
+		if (fs.existsSync(configPath)) {
+			const cfg = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+			if (Array.isArray(cfg.passwords) && cfg.passwords.length > 0)
+				return cfg.passwords.map(String);
+			if (cfg.password) return [cfg.password];
+		}
+	} catch { /* ignore */ }
+	throw new Error('ADMIN_PASSWORD 未设置（可设环境变量、admin-config.json 或 admin-config.json#passwords）');
+}
 const POSTS_DIR = path.join(__dirname, 'src/content/posts');
 
 function parseFrontmatter(content) {
@@ -317,7 +330,8 @@ app.post('/api/admin', (req, res) => {
 			return res.status(429).json({ error: `尝试次数过多，请 ${check.remaining} 分钟后再试` });
 		}
 
-		if (password !== ADMIN_PASSWORD) {
+		const adminPasswords = loadAdminPasswords();
+		if (!adminPasswords.includes(password)) {
 			recordFailedAttempt(ip);
 			const rates = readJSON(RATE_LIMIT_FILE, {});
 			const remaining = MAX_ATTEMPTS - (rates[ip]?.count || 0);
