@@ -1,5 +1,6 @@
 <script lang="ts">
 import { onMount } from "svelte";
+import { fade, slide } from "svelte/transition";
 import { DARK_MODE, LIGHT_MODE } from "../constants/constants";
 import {
 	applyThemeToDocument,
@@ -157,7 +158,7 @@ async function api(action: string, extra: Record<string, unknown> = {}) {
 		body: JSON.stringify(body),
 	});
 	const data = await res.json();
-	if (!res.ok && action !== "login") {
+	if (!res.ok && action !== "login" && action !== "logout") {
 		if (res.status === 401) {
 			logout();
 		}
@@ -284,7 +285,11 @@ function cancelDelete() {
 }
 
 async function logout() {
-	await api("logout");
+	try {
+		await api("logout");
+	} catch {
+		// ignore API errors, always clear local state
+	}
 	token = "";
 	loggedIn = false;
 	currentUser = null;
@@ -545,7 +550,7 @@ function cancelDeleteUser() {
 		</div>
 
 		{#if !loggedIn}
-			<div class="py-12 flex flex-col items-center justify-center gap-4 text-50 text-sm tracking-wider">
+			<div transition:fade={{ duration: 200 }} class="py-12 flex flex-col items-center justify-center gap-4 text-50 text-sm tracking-wider">
 				<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-60"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M2.1 13.1a.97.97 0 0 1 0-2.2 8.69 8.69 0 0 0 5.15-5.89.97.97 0 0 1 1.87 0 8.69 8.69 0 0 0 5.15 5.89.97.97 0 0 1 0 2.2 8.69 8.69 0 0 0-5.15 5.89.97.97 0 0 1-1.87 0 8.69 8.69 0 0 0-5.15-5.89Z"/></svg>
 				<span>请先登录</span>
 				<a href="/login" class="px-5 py-2 rounded-lg text-sm font-medium tracking-wider
@@ -555,7 +560,7 @@ function cancelDeleteUser() {
 			</div>
 
 		{:else if loading}
-			<div class="py-12 flex items-center justify-center gap-3 text-50 text-sm tracking-wider">
+			<div transition:fade={{ duration: 200 }} class="py-12 flex items-center justify-center gap-3 text-50 text-sm tracking-wider">
 				<span class="w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse" />
 				加载中…
 			</div>
@@ -599,7 +604,7 @@ function cancelDeleteUser() {
 
 			{#if activeTab === "status"}
 				<!-- ===== Current Status ===== -->
-				<div class="mb-6 pb-5 border-b border-dashed border-[var(--line-divider)]">
+				<div transition:fade={{ duration: 150 }} class="mb-6 pb-5 border-b border-dashed border-[var(--line-divider)]">
 					<h2 class="flex items-center gap-2 text-base font-semibold mb-3 tracking-wider">
 						<span class="w-1 h-4 rounded-sm bg-[var(--primary)] flex-shrink-0"></span>
 						当前状态
@@ -725,7 +730,7 @@ function cancelDeleteUser() {
 
 			{#if activeTab === "posts"}
 				<!-- ===== Post List ===== -->
-				<div>
+				<div transition:fade={{ duration: 150 }}>
 					<div class="flex items-center justify-between mb-3">
 						<h2 class="flex items-center gap-2 text-base font-semibold tracking-wider">
 							<span class="w-1 h-4 rounded-sm bg-[var(--primary)] flex-shrink-0"></span>
@@ -787,7 +792,7 @@ function cancelDeleteUser() {
 			{/if}
 			{#if activeTab === "users"}
 				<!-- ===== User Management ===== -->
-				<div>
+				<div transition:fade={{ duration: 150 }}>
 					<div class="flex items-center justify-between mb-3">
 						<h2 class="flex items-center gap-2 text-base font-semibold tracking-wider">
 							<span class="w-1 h-4 rounded-sm bg-[var(--primary)] flex-shrink-0"></span>
