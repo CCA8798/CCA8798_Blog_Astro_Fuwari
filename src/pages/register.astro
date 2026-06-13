@@ -1,0 +1,10 @@
+---
+import RegisterForm from "@components/RegisterForm.svelte";
+import Layout from "@layouts/Layout.astro";
+---
+
+<Layout title="注册">
+	<div class="max-w-md mx-auto mt-6 md:mt-8 px-4 md:px-0">
+		<RegisterForm client:only="svelte" />
+	</div>
+</Layout>
