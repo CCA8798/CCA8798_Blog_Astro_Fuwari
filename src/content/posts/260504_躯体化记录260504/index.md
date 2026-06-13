@@ -1,6 +1,7 @@
 ---
 title: 躯体化记录——260504
 published: 2026-05-04T01:50:00+08:00
+author: CCA8798
 description: "饭后谈资"
 tags: ["记录","个人经历","躯体化","聊天记录"]
 category: 记录
