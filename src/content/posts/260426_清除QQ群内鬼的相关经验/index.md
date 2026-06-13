@@ -1,6 +1,7 @@
 ---
 title: 清除QQ群内鬼的相关经验
 published: 2026-04-26T21:30:00+08:00
+author: CCA8798
 description: "清除QQ群内鬼的相关经验"
 tags: ["杂谈"]
 category: 杂谈
