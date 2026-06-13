@@ -362,6 +362,13 @@ function deleteSession(token) {
 	writeJSON(SESSION_FILE, sessions);
 }
 
+function requireAuth(req, res) {
+	const ip = getClientIP(req);
+	const bodyToken = req.body?.token;
+	if (!bodyToken) return null;
+	return validateSession(bodyToken, ip);
+}
+
 function cleanupSessions() {
 	const sessions = readJSON(SESSION_FILE, {});
 	const now = Date.now();
@@ -709,7 +716,7 @@ app.post('/api/admin', (req, res) => {
 
 	// ---- Status management (editor+) ----
 	if (action === 'list') {
-		if (!hasPermission(currentUser, GROUPS.EDITOR)) {
+		if (!hasPermission(currentUser, GROUPS.VIEWER)) {
 			return res.status(403).json({ error: '权限不足' });
 		}
 		const data = readStatus();
