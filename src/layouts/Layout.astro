@@ -415,14 +415,11 @@ const setup = () => {
 		}
 	})
 	window.swup.hooks.on('content:replace', initCustomScrollbar)
+	let pendingBodyClass: string | null = null;
 	window.swup.hooks.on('visit:start', (visit: {to: {url: string}}) => {
-		// change banner height immediately when a link is clicked
-		const bodyElement = document.querySelector('body')
-		if (pathsEqual(visit.to.url, url('/'))) {
-			bodyElement!.classList.add('lg:is-home');
-		} else {
-			bodyElement!.classList.remove('lg:is-home');
-		}
+		// defer body class change until after animation to prevent layout jank
+		const isTargetHome = pathsEqual(visit.to.url, url('/'))
+		pendingBodyClass = isTargetHome ? 'lg:is-home' : null;
 
 		// increase the page height during page transition to prevent the scrolling animation from jumping
 		const heightExtend = document.getElementById('page-height-extend')
@@ -437,6 +434,15 @@ const setup = () => {
 		}
 	});
 	window.swup.hooks.on('page:view', () => {
+		// apply deferred body class change after animation to prevent layout jank
+		const bodyElement = document.querySelector('body')
+		if (pendingBodyClass) {
+			bodyElement!.classList.add(pendingBodyClass);
+		} else if (bodyElement!.classList.contains('lg:is-home')) {
+			bodyElement!.classList.remove('lg:is-home');
+		}
+		pendingBodyClass = null;
+
 		// hide the temp high element when the transition is done
 		const heightExtend = document.getElementById('page-height-extend')
 		if (heightExtend) {
