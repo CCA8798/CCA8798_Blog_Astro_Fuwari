@@ -182,14 +182,26 @@ const bannerOffset =
 	.enable-banner.is-home #main-grid {
 		@apply translate-y-[var(--banner-height-extend)];
 	}
-	.enable-banner #top-row {
+	.enable-banner.is-home #top-row {
 		@apply h-[calc(var(--banner-height-home)_-_4.5rem)] transition-all duration-300
+	}
+	.enable-banner #top-row {
+		@apply h-[4.5rem] transition-all duration-300
 	}
 	.enable-banner.is-home #sidebar-sticky {
 		@apply top-[calc(1rem_-_var(--banner-height-extend))]
 	}
 	.navbar-hidden {
 		@apply opacity-0 -translate-y-16
+	}
+}
+@media (max-width: 767px) {
+	.enable-banner.is-home #banner-wrapper,
+	.enable-banner.is-home #banner {
+		height: 20vh;
+	}
+	.enable-banner.is-home #top-row {
+		height: calc(20vh - 4.5rem);
 	}
 }
 </style>
@@ -356,10 +368,7 @@ function showBanner() {
 	if (!siteConfig.banner.enable) return;
 
 	const banner = document.getElementById('banner');
-	if (!banner) {
-		console.error('Banner element not found');
-		return;
-	}
+	if (!banner) return;
 
 	banner.classList.remove('opacity-0', 'scale-105');
 }
@@ -480,13 +489,14 @@ function scrollFunction() {
 	if (!bannerEnabled) return
 	if (navbar) {
 		const NAVBAR_HEIGHT = 72
-		const MAIN_PANEL_EXCESS_HEIGHT = MAIN_PANEL_OVERLAPS_BANNER_HEIGHT * 16			// The height the main panel overlaps the banner
+		const MAIN_PANEL_EXCESS_HEIGHT = MAIN_PANEL_OVERLAPS_BANNER_HEIGHT * 16
 
-		let bannerHeight = BANNER_HEIGHT
+		let threshold
 		if (document.body.classList.contains('lg:is-home') && window.innerWidth >= 1024) {
-			bannerHeight = BANNER_HEIGHT_HOME
+			threshold = window.innerHeight * (BANNER_HEIGHT_HOME / 100) - NAVBAR_HEIGHT - MAIN_PANEL_EXCESS_HEIGHT - 16
+		} else {
+			threshold = NAVBAR_HEIGHT + 16
 		}
-		let threshold = window.innerHeight * (bannerHeight / 100) - NAVBAR_HEIGHT - MAIN_PANEL_EXCESS_HEIGHT - 16
 		if (document.body.scrollTop >= threshold || document.documentElement.scrollTop >= threshold) {
 			navbar.classList.add('navbar-hidden')
 		} else {

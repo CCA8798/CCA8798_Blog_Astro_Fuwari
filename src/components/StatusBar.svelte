@@ -5,6 +5,11 @@ let currentTime = $state("");
 let weather: { temp: number; desc: string } | null = $state(null);
 let status: { text: string } | null = $state(null);
 let proverb = $state("");
+let userInfo = $state<{
+	loggedIn: boolean;
+	displayName?: string;
+	group?: string;
+} | null>(null);
 
 onMount(() => {
 	updateTime();
@@ -13,6 +18,7 @@ onMount(() => {
 	fetchWeather();
 	fetchStatus();
 	fetchProverb();
+	fetchUserInfo();
 
 	return () => clearInterval(timer);
 });
@@ -103,6 +109,22 @@ async function fetchProverb() {
 		// ignore
 	}
 }
+
+async function fetchUserInfo() {
+	try {
+		const saved = localStorage.getItem("admin_token");
+		if (!saved) return;
+		const res = await fetch("/api/me", {
+			headers: { Authorization: `Bearer ${saved}` },
+		});
+		if (res.ok) {
+			const data = await res.json();
+			if (data.loggedIn) userInfo = data;
+		}
+	} catch {
+		// ignore
+	}
+}
 </script>
 
 <div class="card-base p-3" id="status-bar">
@@ -130,6 +152,18 @@ async function fetchProverb() {
 			<span class="flex items-center gap-1.5 whitespace-nowrap max-w-[40vw] truncate" title={proverb}>
 				<span class="inline-block w-2 h-2 rounded-full bg-[var(--primary)] status-dot"></span>
 				<span>每日谏言：{proverb}</span>
+			</span>
+		{/if}
+
+		{#if userInfo?.loggedIn}
+			<span class="flex items-center gap-1.5 whitespace-nowrap">
+				<span class="inline-block w-2 h-2 rounded-full bg-[var(--primary)] status-dot"></span>
+				<span>
+					{userInfo.displayName}
+					<span class="opacity-60">
+						({userInfo.group === 'admin' ? '管理员' : userInfo.group === 'editor' ? '编辑' : '用户'})
+					</span>
+				</span>
 			</span>
 		{/if}
 	</div>
