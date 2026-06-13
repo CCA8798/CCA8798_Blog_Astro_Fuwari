@@ -55,14 +55,14 @@ export const navBarConfig: NavBarConfig = {
 			external: false,
 		},
 		{
-			name: "B站主页",
-			url: "https://space.bilibili.com/688231358", // Internal links should not include the base path, as it is automatically added
-			external: true, // Show an external link icon and will open in a new tab
-		},
-		{
 			name: "后台管理",
 			url: "/admin",
 			external: false,
+		},
+		{
+			name: "B站主页",
+			url: "https://space.bilibili.com/688231358", // Internal links should not include the base path, as it is automatically added
+			external: true, // Show an external link icon and will open in a new tab
 		},
 	],
 };
