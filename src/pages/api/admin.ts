@@ -6,12 +6,50 @@ import type { APIRoute } from "astro";
 const STATUS_FILE = path.resolve("status.json");
 const RATE_LIMIT_FILE = path.resolve("rate-limit.json");
 const SESSION_FILE = path.resolve("admin-session.json");
+const USERS_FILE = path.resolve("users.json");
 const MAX_HISTORY = 200;
 const MAX_ATTEMPTS = 3;
 const RATE_WINDOW_MS = 30 * 60 * 1000; // 30 minutes
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const REGISTER_MAX_PER_IP = 3;
+const REGISTER_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const REGISTER_MIN_TIME_MS = 3000; // 3 seconds
+const REGISTER_RATE_FILE = path.resolve("register-rate.json");
 
-function loadAdminPasswords(): string[] {
+// --- User groups ---
+const GROUPS = { ADMIN: "admin", EDITOR: "editor", VIEWER: "viewer" } as const;
+const GROUP_HIERARCHY: Record<string, number> = {
+	admin: 3,
+	editor: 2,
+	viewer: 1,
+};
+
+// Password hashing (scrypt)
+function hashPassword(password: string): string {
+	const salt = crypto.randomBytes(16).toString("hex");
+	const keylen = 64;
+	const derivedKey = crypto.scryptSync(password, salt, keylen, {
+		N: 16384,
+		r: 8,
+		p: 1,
+		maxmem: 256 * 1024 * 1024,
+	});
+	return salt + ":" + derivedKey.toString("hex");
+}
+
+function verifyPassword(password: string, stored: string): boolean {
+	const [salt, key] = stored.split(":");
+	const keylen = 64;
+	const derivedKey = crypto.scryptSync(password, salt, keylen, {
+		N: 16384,
+		r: 8,
+		p: 1,
+		maxmem: 256 * 1024 * 1024,
+	});
+	return key === derivedKey.toString("hex");
+}
+
+function loadAdminPasswords(): string[] | null {
 	const envPw = process.env.ADMIN_PASSWORD;
 	if (envPw)
 		return envPw
@@ -29,9 +67,7 @@ function loadAdminPasswords(): string[] {
 	} catch {
 		/* ignore */
 	}
-	throw new Error(
-		"ADMIN_PASSWORD 未设置（可设环境变量、admin-config.json 或 admin-config.json#passwords）",
-	);
+	return null;
 }
 const POSTS_DIR = path.resolve("src/content/posts");
 
@@ -43,6 +79,7 @@ interface PostInfo {
 	tags: string[];
 	category: string;
 	description: string;
+	author: string;
 }
 
 interface PostFull extends PostInfo {
@@ -141,6 +178,7 @@ function readPostList(): PostInfo[] {
 				tags: (data.tags as string[]) || [],
 				category: (data.category as string) || "",
 				description: (data.description as string) || "",
+				author: (data.author as string) || "",
 			});
 		}
 	} catch {
@@ -167,6 +205,7 @@ function readPost(slug: string): PostFull | null {
 		tags: (data.tags as string[]) || [],
 		category: (data.category as string) || "",
 		description: (data.description as string) || "",
+		author: (data.author as string) || "",
 		body,
 	};
 }
@@ -187,7 +226,7 @@ interface RateData {
 }
 
 interface SessionData {
-	[token: string]: { ip: string; createdAt: number };
+	[token: string]: { ip: string; username: string; createdAt: number };
 }
 
 function readJSON<T>(file: string, fallback: T): T {
@@ -282,24 +321,71 @@ function clearRateLimit(ip: string): void {
 	writeJSON(RATE_LIMIT_FILE, rates);
 }
 
-function createSession(ip: string): string {
+// Registration rate limiting
+function checkRegisterRate(ip: string): {
+	allowed: boolean;
+	remaining: number;
+} {
+	const now = Date.now();
+	const rates = readJSON<
+		Record<string, { count: number; firstAttempt: number }>
+	>(REGISTER_RATE_FILE, {});
+	const entry = rates[ip];
+	if (!entry || now - entry.firstAttempt > REGISTER_WINDOW_MS) {
+		rates[ip] = { count: 0, firstAttempt: now };
+		writeJSON(REGISTER_RATE_FILE, rates);
+		return { allowed: true, remaining: REGISTER_MAX_PER_IP };
+	}
+	if (entry.count >= REGISTER_MAX_PER_IP) {
+		const wait = Math.ceil(
+			(entry.firstAttempt + REGISTER_WINDOW_MS - now) / 60000,
+		);
+		return { allowed: false, remaining: wait };
+	}
+	return { allowed: true, remaining: REGISTER_MAX_PER_IP - entry.count };
+}
+
+function recordRegisterAttempt(ip: string): void {
+	const now = Date.now();
+	const rates = readJSON<
+		Record<string, { count: number; firstAttempt: number }>
+	>(REGISTER_RATE_FILE, {});
+	if (!rates[ip] || now - rates[ip].firstAttempt > REGISTER_WINDOW_MS) {
+		rates[ip] = { count: 1, firstAttempt: now };
+	} else {
+		rates[ip].count++;
+	}
+	writeJSON(REGISTER_RATE_FILE, rates);
+}
+
+function createSession(ip: string, username: string): string {
 	const token = crypto.randomUUID();
 	const sessions = readJSON<SessionData>(SESSION_FILE, {});
-	sessions[token] = { ip, createdAt: Date.now() };
+	sessions[token] = { ip, username, createdAt: Date.now() };
 	writeJSON(SESSION_FILE, sessions);
 	return token;
 }
 
-function validateSession(token: string, ip: string): boolean {
+function validateSession(
+	token: string,
+	ip: string,
+): { ip: string; username: string; createdAt: number } | null {
 	const sessions = readJSON<SessionData>(SESSION_FILE, {});
 	const session = sessions[token];
-	if (!session) return false;
+	if (!session) return null;
 	if (Date.now() - session.createdAt > SESSION_TTL_MS) {
 		delete sessions[token];
 		writeJSON(SESSION_FILE, sessions);
-		return false;
+		return null;
 	}
-	return session.ip === ip;
+	if (session.ip !== ip) return null;
+	return session;
+}
+
+function deleteSession(token: string): void {
+	const sessions = readJSON<SessionData>(SESSION_FILE, {});
+	delete sessions[token];
+	writeJSON(SESSION_FILE, sessions);
 }
 
 function cleanupSessions(): void {
@@ -313,6 +399,58 @@ function cleanupSessions(): void {
 		}
 	}
 	if (changed) writeJSON(SESSION_FILE, sessions);
+}
+
+// User management
+const DEFAULT_USERS = [
+	{
+		username: "CCA8798",
+		displayName: "捌拐玖捌",
+		group: "admin" as const,
+		createdAt: new Date().toISOString(),
+		bio: "站长",
+	},
+];
+
+function readUsers(): Array<Record<string, unknown>> | null {
+	const data = readJSON<{ users: Array<Record<string, unknown>> } | null>(
+		USERS_FILE,
+		null,
+	);
+	if (data && Array.isArray(data.users)) return data.users;
+	return null;
+}
+
+function writeUsers(users: Array<Record<string, unknown>>): void {
+	writeJSON(USERS_FILE, { users });
+}
+
+function initUsers(): Array<Record<string, unknown>> {
+	const existing = readUsers();
+	if (existing) return existing;
+	const users = DEFAULT_USERS.map((u) => ({
+		...u,
+		password: hashPassword("lin20120103"),
+	}));
+	writeUsers(users);
+	return users;
+}
+
+function findUser(username: string): Record<string, unknown> | null {
+	const users = readUsers();
+	if (!users) return null;
+	return users.find((u) => u.username === username) || null;
+}
+
+function getGroup(username: string): string | null {
+	const user = findUser(username);
+	return user ? (user.group as string) : null;
+}
+
+function hasPermission(username: string, requiredGroup: string): boolean {
+	const group = getGroup(username);
+	if (!group) return false;
+	return (GROUP_HIERARCHY[group] || 0) >= (GROUP_HIERARCHY[requiredGroup] || 0);
 }
 
 export const prerender = false;
@@ -335,7 +473,6 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 		const body = await request.json();
 		const {
 			action,
-			password,
 			token,
 			text,
 			id,
@@ -349,6 +486,107 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 			body: postBody,
 		} = body;
 
+		// Register (no session required, public)
+		if (action === "register") {
+			const regUser = ((body.username as string) || "").trim();
+			const regPass = body.password as string;
+			const regConfirm = body.confirmPassword as string;
+			const regDisplay = ((body.displayName as string) || "").trim() || regUser;
+			const regBio = ((body.bio as string) || "").trim();
+			const honeypot = body.honeypot as string;
+			const pageLoad = Number(body.pageLoad);
+
+			// Anti-automation: honeypot
+			if (honeypot) {
+				return new Response(JSON.stringify({ error: "无效的注册请求" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+
+			// Anti-automation: time gate
+			if (!pageLoad || Date.now() - pageLoad < REGISTER_MIN_TIME_MS) {
+				return new Response(JSON.stringify({ error: "请稍后再试" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+
+			// Validate fields
+			if (!regUser || regUser.length < 2 || regUser.length > 20) {
+				return new Response(JSON.stringify({ error: "用户名为 2-20 个字符" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]+$/.test(regUser)) {
+				return new Response(
+					JSON.stringify({ error: "用户名只能包含字母、数字、下划线和中文" }),
+					{ status: 400, headers: { "Content-Type": "application/json" } },
+				);
+			}
+			if (!regPass || regPass.length < 6) {
+				return new Response(JSON.stringify({ error: "密码至少 6 个字符" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			if (regPass !== regConfirm) {
+				return new Response(JSON.stringify({ error: "两次密码输入不一致" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+
+			// Rate limit
+			initUsers();
+			const rateCheck = checkRegisterRate(ip);
+			if (!rateCheck.allowed) {
+				return new Response(
+					JSON.stringify({
+						error: `注册太频繁，请 ${rateCheck.remaining} 分钟后再试`,
+					}),
+					{ status: 429, headers: { "Content-Type": "application/json" } },
+				);
+			}
+
+			// Check duplicate
+			const users = readUsers() || [];
+			if (users.find((u) => u.username === regUser)) {
+				return new Response(JSON.stringify({ error: "用户名已存在" }), {
+					status: 409,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+
+			// Create user (default group: viewer)
+			recordRegisterAttempt(ip);
+			users.push({
+				username: regUser,
+				displayName: regDisplay,
+				password: hashPassword(regPass),
+				group: GROUPS.VIEWER,
+				createdAt: new Date().toISOString(),
+				bio: regBio,
+			});
+			writeUsers(users);
+
+			// Auto-login after registration
+			const sessionToken = createSession(ip, regUser);
+			return new Response(
+				JSON.stringify({
+					success: true,
+					token: sessionToken,
+					user: {
+						username: regUser,
+						displayName: regDisplay,
+						group: GROUPS.VIEWER,
+					},
+				}),
+				{ status: 200, headers: { "Content-Type": "application/json" } },
+			);
+		}
+
 		// Login
 		if (action === "login") {
 			const check = checkRateLimit(ip);
@@ -361,32 +599,178 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 				);
 			}
 
-			const adminPasswords = loadAdminPasswords();
-			if (!adminPasswords.includes(password)) {
-				recordFailedAttempt(ip);
-				const rates = readJSON<RateData>(RATE_LIMIT_FILE, {});
-				const remaining = MAX_ATTEMPTS - (rates[ip]?.count || 0);
-				if (remaining <= 0) {
-					const wait = Math.ceil(RATE_WINDOW_MS / 60000);
+			const loginUser = body.username as string | undefined;
+			const loginPass = body.password as string;
+
+			if (!loginUser || !loginPass) {
+				return new Response(JSON.stringify({ error: "用户名和密码不能为空" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+
+			// Ensure users.json exists for user-based auth
+			initUsers();
+
+			// Try user-based auth first
+			const user = findUser(loginUser);
+			if (user && user.password) {
+				if (!verifyPassword(loginPass, user.password as string)) {
+					recordFailedAttempt(ip);
+					const rates = readJSON<RateData>(RATE_LIMIT_FILE, {});
+					const remaining = MAX_ATTEMPTS - (rates[ip]?.count || 0);
+					if (remaining <= 0) {
+						const wait = Math.ceil(RATE_WINDOW_MS / 60000);
+						return new Response(
+							JSON.stringify({
+								error: `密码错误次数过多，请 ${wait} 分钟后再试`,
+							}),
+							{ status: 429, headers: { "Content-Type": "application/json" } },
+						);
+					}
 					return new Response(
-						JSON.stringify({
-							error: `密码错误次数过多，请 ${wait} 分钟后再试`,
-						}),
-						{ status: 429, headers: { "Content-Type": "application/json" } },
+						JSON.stringify({ error: `密码错误，还剩 ${remaining} 次机会` }),
+						{ status: 401, headers: { "Content-Type": "application/json" } },
 					);
 				}
+				clearRateLimit(ip);
+				const sessionToken = createSession(ip, user.username as string);
 				return new Response(
 					JSON.stringify({
-						error: `密码错误，还剩 ${remaining} 次机会`,
+						success: true,
+						token: sessionToken,
+						user: {
+							username: user.username,
+							displayName:
+								(user.displayName as string) || (user.username as string),
+							group: user.group,
+						},
 					}),
-					{ status: 401, headers: { "Content-Type": "application/json" } },
+					{ status: 200, headers: { "Content-Type": "application/json" } },
 				);
 			}
 
-			clearRateLimit(ip);
-			const sessionToken = createSession(ip);
+			// Fallback: legacy password-only auth
+			const adminPasswords = loadAdminPasswords();
+			if (adminPasswords && adminPasswords.includes(loginPass)) {
+				clearRateLimit(ip);
+				initUsers();
+				const adminUser = findUser("CCA8798");
+				const sessionToken = createSession(ip, adminUser ? "CCA8798" : "admin");
+				return new Response(
+					JSON.stringify({
+						success: true,
+						token: sessionToken,
+						user: {
+							username: "CCA8798",
+							displayName: "捌拐玖捌",
+							group: "admin",
+						},
+					}),
+					{ status: 200, headers: { "Content-Type": "application/json" } },
+				);
+			}
+
+			recordFailedAttempt(ip);
+			const rates = readJSON<RateData>(RATE_LIMIT_FILE, {});
+			const remaining = MAX_ATTEMPTS - (rates[ip]?.count || 0);
+			if (remaining <= 0) {
+				const wait = Math.ceil(RATE_WINDOW_MS / 60000);
+				return new Response(
+					JSON.stringify({ error: `尝试次数过多，请 ${wait} 分钟后再试` }),
+					{ status: 429, headers: { "Content-Type": "application/json" } },
+				);
+			}
 			return new Response(
-				JSON.stringify({ success: true, token: sessionToken }),
+				JSON.stringify({ error: `用户名或密码错误，还剩 ${remaining} 次机会` }),
+				{ status: 401, headers: { "Content-Type": "application/json" } },
+			);
+		}
+
+		// All other actions require token validation
+		const session = token ? validateSession(token, ip) : null;
+		if (!session) {
+			return new Response(JSON.stringify({ error: "未登录或会话已过期" }), {
+				status: 401,
+				headers: { "Content-Type": "application/json" },
+			});
+		}
+
+		const currentUser = session.username;
+
+		// Periodic session cleanup
+		cleanupSessions();
+
+		// ---- Logout ----
+		if (action === "logout") {
+			deleteSession(token);
+			return new Response(JSON.stringify({ success: true }), {
+				status: 200,
+				headers: { "Content-Type": "application/json" },
+			});
+		}
+
+		// ---- User management (admin only) ----
+		if (action === "userList") {
+			if (!hasPermission(currentUser, GROUPS.ADMIN)) {
+				return new Response(JSON.stringify({ error: "权限不足" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			const users = readUsers();
+			if (!users)
+				return new Response(JSON.stringify([]), {
+					status: 200,
+					headers: { "Content-Type": "application/json" },
+				});
+			const safeUsers = users.map((u) => ({
+				username: u.username,
+				displayName: u.displayName || u.username,
+				group: u.group,
+				createdAt: u.createdAt,
+				bio: u.bio || "",
+				hasPassword: !!u.password,
+			}));
+			return new Response(JSON.stringify(safeUsers), {
+				status: 200,
+				headers: { "Content-Type": "application/json" },
+			});
+		}
+
+		if (action === "userCreate") {
+			if (!hasPermission(currentUser, GROUPS.ADMIN)) {
+				return new Response(JSON.stringify({ error: "权限不足" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			const newUsername = body.username as string;
+			const userPw = body.userPassword as string;
+			if (!newUsername || !userPw) {
+				return new Response(JSON.stringify({ error: "用户名和密码不能为空" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			const users = readUsers() || [];
+			if (users.find((u) => u.username === newUsername)) {
+				return new Response(JSON.stringify({ error: "用户名已存在" }), {
+					status: 409,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			users.push({
+				username: newUsername,
+				displayName: (body.displayName as string) || newUsername,
+				password: hashPassword(userPw),
+				group: (body.userGroup as string) || GROUPS.VIEWER,
+				createdAt: new Date().toISOString(),
+				bio: (body.userBio as string) || "",
+			});
+			writeUsers(users);
+			return new Response(
+				JSON.stringify({ success: true, username: newUsername }),
 				{
 					status: 200,
 					headers: { "Content-Type": "application/json" },
@@ -394,21 +778,96 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 			);
 		}
 
-		// All other actions require token validation
-		if (!token || !validateSession(token, ip)) {
-			return new Response(JSON.stringify({ error: "未登录或会话已过期" }), {
-				status: 401,
-				headers: { "Content-Type": "application/json" },
-			});
+		if (action === "userUpdate") {
+			if (!hasPermission(currentUser, GROUPS.ADMIN)) {
+				return new Response(JSON.stringify({ error: "权限不足" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			const editUsername = body.username as string;
+			if (!editUsername) {
+				return new Response(JSON.stringify({ error: "用户名不能为空" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			const users = readUsers() || [];
+			const idx = users.findIndex((u) => u.username === editUsername);
+			if (idx === -1) {
+				return new Response(JSON.stringify({ error: "用户不存在" }), {
+					status: 404,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			if (body.displayName !== undefined)
+				users[idx].displayName = body.displayName;
+			if (body.userGroup !== undefined) users[idx].group = body.userGroup;
+			if (body.userBio !== undefined) users[idx].bio = body.userBio;
+			if (body.userPassword)
+				users[idx].password = hashPassword(body.userPassword as string);
+			writeUsers(users);
+			return new Response(
+				JSON.stringify({ success: true, username: editUsername }),
+				{
+					status: 200,
+					headers: { "Content-Type": "application/json" },
+				},
+			);
 		}
 
-		// Periodic session cleanup
-		cleanupSessions();
+		if (action === "userDelete") {
+			if (!hasPermission(currentUser, GROUPS.ADMIN)) {
+				return new Response(JSON.stringify({ error: "权限不足" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			const delUsername = body.username as string;
+			if (!delUsername) {
+				return new Response(JSON.stringify({ error: "用户名不能为空" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			if (delUsername === "CCA8798") {
+				return new Response(
+					JSON.stringify({ error: "不能删除初始管理员账号" }),
+					{
+						status: 403,
+						headers: { "Content-Type": "application/json" },
+					},
+				);
+			}
+			const users = readUsers() || [];
+			const idx = users.findIndex((u) => u.username === delUsername);
+			if (idx === -1) {
+				return new Response(JSON.stringify({ error: "用户不存在" }), {
+					status: 404,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			users.splice(idx, 1);
+			writeUsers(users);
+			return new Response(
+				JSON.stringify({ success: true, username: delUsername }),
+				{
+					status: 200,
+					headers: { "Content-Type": "application/json" },
+				},
+			);
+		}
 
 		const data = readStatus();
 
 		// List status + history
 		if (action === "list") {
+			if (!hasPermission(currentUser, GROUPS.VIEWER)) {
+				return new Response(JSON.stringify({ error: "权限不足" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
 			return new Response(
 				JSON.stringify({ current: data.current, history: data.history }),
 				{
@@ -420,6 +879,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
 		// Update current status (adds to history)
 		if (action === "updateCurrent") {
+			if (!hasPermission(currentUser, GROUPS.EDITOR)) {
+				return new Response(JSON.stringify({ error: "权限不足" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
 			if (!text || typeof text !== "string" || !text.trim()) {
 				return new Response(JSON.stringify({ error: "状态内容不能为空" }), {
 					status: 400,
@@ -445,6 +910,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
 		// Create a history entry without changing current
 		if (action === "create") {
+			if (!hasPermission(currentUser, GROUPS.EDITOR)) {
+				return new Response(JSON.stringify({ error: "权限不足" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
 			if (!text || typeof text !== "string" || !text.trim()) {
 				return new Response(JSON.stringify({ error: "状态内容不能为空" }), {
 					status: 400,
@@ -469,6 +940,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
 		// Edit a history entry by ID
 		if (action === "edit") {
+			if (!hasPermission(currentUser, GROUPS.EDITOR)) {
+				return new Response(JSON.stringify({ error: "权限不足" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
 			if (!id || typeof id !== "string") {
 				return new Response(JSON.stringify({ error: "缺少 ID" }), {
 					status: 400,
@@ -505,6 +982,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
 		// Delete a history entry by ID
 		if (action === "delete") {
+			if (!hasPermission(currentUser, GROUPS.EDITOR)) {
+				return new Response(JSON.stringify({ error: "权限不足" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
 			if (!id || typeof id !== "string") {
 				return new Response(JSON.stringify({ error: "缺少 ID" }), {
 					status: 400,
@@ -537,6 +1020,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
 		// List all posts
 		if (action === "postList") {
+			if (!hasPermission(currentUser, GROUPS.EDITOR)) {
+				return new Response(JSON.stringify({ error: "权限不足" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
 			const posts = readPostList();
 			return new Response(JSON.stringify(posts), {
 				status: 200,
@@ -546,6 +1035,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
 		// Get single post
 		if (action === "postGet") {
+			if (!hasPermission(currentUser, GROUPS.EDITOR)) {
+				return new Response(JSON.stringify({ error: "权限不足" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
 			if (!slug || typeof slug !== "string") {
 				return new Response(JSON.stringify({ error: "缺少 slug" }), {
 					status: 400,
@@ -567,6 +1062,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
 		// Create new post
 		if (action === "postCreate") {
+			if (!hasPermission(currentUser, GROUPS.EDITOR)) {
+				return new Response(JSON.stringify({ error: "权限不足" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
 			if (!slug || typeof slug !== "string" || !slug.trim()) {
 				return new Response(JSON.stringify({ error: "slug 不能为空" }), {
 					status: 400,
@@ -595,6 +1096,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 			if (tags && Array.isArray(tags)) fmData.tags = tags;
 			if (category) fmData.category = String(category).trim();
 			if (draft !== undefined) fmData.draft = draft;
+			fmData.author = body.author ? String(body.author).trim() : currentUser;
 			fmData.lang = "";
 			const frontmatter = buildFrontmatter(fmData);
 			const mdBody = typeof postBody === "string" ? postBody : "";
@@ -620,6 +1122,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
 		// Update existing post
 		if (action === "postUpdate") {
+			if (!hasPermission(currentUser, GROUPS.EDITOR)) {
+				return new Response(JSON.stringify({ error: "权限不足" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
 			if (!slug || typeof slug !== "string" || !slug.trim()) {
 				return new Response(JSON.stringify({ error: "slug 不能为空" }), {
 					status: 400,
@@ -643,6 +1151,8 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 			if (tags !== undefined && Array.isArray(tags)) newData.tags = tags;
 			if (category !== undefined) newData.category = String(category).trim();
 			if (draft !== undefined) newData.draft = draft;
+			if (body.author !== undefined)
+				newData.author = String(body.author).trim();
 			const frontmatter = buildFrontmatter(newData);
 			const mdBody = typeof postBody === "string" ? postBody : oldBody;
 			const fileContent = `${frontmatter}\n${mdBody}`;
@@ -666,6 +1176,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
 		// Delete post
 		if (action === "postDelete") {
+			if (!hasPermission(currentUser, GROUPS.ADMIN)) {
+				return new Response(JSON.stringify({ error: "权限不足" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
 			if (!slug || typeof slug !== "string" || !slug.trim()) {
 				return new Response(JSON.stringify({ error: "slug 不能为空" }), {
 					status: 400,
