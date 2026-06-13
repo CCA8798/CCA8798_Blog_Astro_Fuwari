@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "username": "CCA8798",
+      "displayName": "捌拐玖捌",
+      "group": "admin",
+      "createdAt": "2026-06-13T06:09:09.562Z",
+      "bio": "站长",
+      "password": "4aee1fff1b22121459236b278a636156:1a44fc004cfe4237eb3fcab3b2193a87a8388956ea6522f5a3998f99e4427d7e2f12e49ab2505dd05c5cdc380a4cb8152419a3a5800c942dfb565a606ccb7b75"
+    },
+    {
+      "username": "Eraya",
+      "displayName": "Eraya",
+      "password": "8d85eca67807fb3633a4bea2b9947bf4:58cbeae68975f58bb1148c22bcf25a6cb7120a3d90a229fe38a4766530dffe7b6386b21d544db543bd3ff5360353327ad96a483c6b0435d2f6a4fcfbcf8e7675",
+      "group": "admin",
+      "createdAt": "2026-06-13T10:15:38.273Z",
+      "bio": "Eraya酱"
+    }
+  ]
+}
