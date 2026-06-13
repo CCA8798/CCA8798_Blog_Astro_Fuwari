@@ -675,10 +675,10 @@ function cancelDeleteUser() {
 					<h2 class="flex items-center gap-2 text-base font-semibold mb-3 tracking-wider">
 						<span class="w-1 h-4 rounded-sm bg-[var(--primary)] flex-shrink-0"></span>
 						历史记录
-						<span class="text-xs font-normal text-50 ml-1 px-2 py-0.5 rounded-full bg-[var(--primary)]/10">{statusData.history.length}</span>
+						<span class="text-xs font-normal text-50 ml-1 px-2 py-0.5 rounded-full bg-[var(--primary)]/10">{statusData?.history?.length ?? 0}</span>
 					</h2>
 					<div class="flex flex-col gap-1">
-						{#each statusData.history as entry, i}
+						{#each statusData?.history ?? [] as entry, i}
 							<div class="group flex items-start gap-2.5 p-3 border border-[var(--line-color)] rounded-lg transition
 								hover:border-[var(--primary)]/20 hover:bg-[var(--primary)]/[0.03] hover:translate-x-0.5
 								class:border-[var(--primary)]={editingId === entry.id}
