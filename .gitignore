@@ -34,8 +34,10 @@ status.json
 
 # admin
 rate-limit.json
+register-rate.json
 admin-session.json
 admin-config.json
+users.json
 
 #build
 build/
