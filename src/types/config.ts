@@ -91,6 +91,7 @@ export type BlogPostData = {
 	draft?: boolean;
 	image?: string;
 	category?: string;
+	author?: string;
 	prevTitle?: string;
 	prevSlug?: string;
 	nextTitle?: string;

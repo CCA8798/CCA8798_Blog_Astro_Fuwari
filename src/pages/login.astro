@@ -1,0 +1,10 @@
+---
+import LoginForm from "@components/LoginForm.svelte";
+import Layout from "@layouts/Layout.astro";
+---
+
+<Layout title="登录">
+	<div class="max-w-md mx-auto mt-8 md:mt-12 px-4 md:px-0">
+		<LoginForm client:only="svelte" />
+	</div>
+</Layout>
