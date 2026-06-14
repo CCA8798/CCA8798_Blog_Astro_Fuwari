@@ -3,6 +3,7 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 
+import BackgroundParticles from "@components/BackgroundParticles.astro";
 import ConfigCarrier from "@components/ConfigCarrier.astro";
 import { profileConfig, siteConfig } from "@/config";
 import {
@@ -153,6 +154,7 @@ const bannerOffset =
 	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
 		  data-overlayscrollbars-initialize
 	>
+		<BackgroundParticles />
 		<ConfigCarrier></ConfigCarrier>\
 		<slot />
 		<!-- increase the page height during page transition to prevent the scrolling animation from jumping -->

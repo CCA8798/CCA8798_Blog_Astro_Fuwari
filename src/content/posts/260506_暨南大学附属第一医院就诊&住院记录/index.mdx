@@ -18,6 +18,7 @@ import Record1 from './Record1.png';
 import Record2 from './Record2.png';
 import Record3 from './Record3.png';
 import Price1 from './Price1.png';
+import Price2 from './Price2.png';
 import SeveralPeople1 from './SeveralPeople1.jpg';
 import SeveralPeople2 from './SeveralPeople2.jpg';
 import Markdown from "@components/misc/Markdown.astro";
@@ -141,11 +142,9 @@ import Markdown from "@components/misc/Markdown.astro";
 
 完成以上最困难的部分之后，有概率获得贾医生夸奖(<spoiler>“我看这个孩子包括逻辑和语言表达方面都非常清晰”</spoiler>)
 
-{/* 之后，贾医生会给你开一系列药品和检查 */}
-
 一般而言，贾医生会开心理治疗和又一批量表检查(昂贵，参见[MTF Wiki](https://mtf.wiki/zh-cn/docs/psyco/guangdong/jia-yanbin))，有概率不开抽血(比如站长就没有开，可能是站长在首诊问询说过觉得抽血贵的原因)
 
-这些量表同样是在手机上完成的，至少包括SCL-90、MMPI、SDS、SAS、HAMA、HAMD……
+这些量表同样是在手机上完成的，可能包括SCL-90、MMPI、SDS、SAS、HAMA、HAMD……
 
 :::TIP
 - 如果和站长一样有双相+重抑+中焦+自杀倾向+跨性别的话，贾医生有概率会开住院(住院可以玩手机，但未成年需要至少一位家长24小时陪护)
@@ -214,7 +213,8 @@ import Markdown from "@components/misc/Markdown.astro";
 | 脸盆 | 1个 |
 | 洗发水(旅行装) | 1瓶 |
 | 沐浴露(旅行装) | 1瓶 |
-| 桌游 | 1套 |
+| 桌游 | 建议1套 |
+| 喜欢的书籍 | 建议1~2本 |
 | 换洗的常服 | 2套 |
 | 水瓶 | 1瓶 |
 | 本人身份证 | 1张 |
@@ -242,6 +242,7 @@ import Markdown from "@components/misc/Markdown.astro";
     - 每天早上9:00~11:00左右会有医生查房，查房时会提问一些有关身体状况的问题；贾医生一般是一周查一次房，其余则是黄医生及赖医生等副主任医师、主治医师负责
     - 住院期间会有团体心理治疗/个人心理治疗，具体取决于贾艳滨开出的单子，团体治疗时不喜欢的提问可以跳过，个人治疗则需要在门诊时向贾艳滨提出相关诉求
     - 住院期间每天会有“敲头”(即颅脑刺激治疗)、“夹耳朵”(即颅微电流刺激疗法CES)、中药敷肚子、病情严重还有可能接受电休克治疗(ECT)等治疗项目，建议提前做好心理准备
+    - 医院每天晚上22:00熄灯，一般21:00前后洗澡，因此无法熬夜玩手机，建议提前做好心理准备
     :::
     
     贾艳滨查房会带着一大堆医学生及医师：
@@ -302,15 +303,33 @@ import Markdown from "@components/misc/Markdown.astro";
 | 常规心电图15导联 |
     </div>
 </div>
-{/* 
-<ImageGallery images={[
-  { src: Record1, alt: '主界面' },
-  { src: Record2, alt: '设置页面', caption: '设置页面截图说明' },
-  { src: Record3, alt: '统计图表' },
-]} /> */}
 
-<span class="text-center justify-center pt-5 block pb-5"><i>======住院及复诊相关部分会在站长住完院后补充❤️======</i></span>
 
+
+<div class="m-3" style="border:1px solid #ccc; padding: 1.5rem; border-radius: 5px;">
+    <span class="text-xl font-bold">出院</span>
+
+出院主要取决于当前病情是否稳定，所以尽量不要让医生/护士发现割手的痕迹
+
+如果一切都良好并且做完上文提到的检查，并且指标没有出现异常的话，可以自行申请出院
+
+出院前需要补缴住院期间的费用，缴费需要根据护士的指引到一楼缴费处办理(貌似是在DR检查室旁边的大厅)
+
+<span class="text-center justify-center pt-5 block">缴费明细</span>
+
+      <Image src={Price2} alt="精神医学科" class="mx-auto w-3/5 object-cover rounded-lg shadow-md" />
+
+<span class="text-center justify-center pt-10 block pb-5">出院证明</span>
+
+<div class="not-prose" style="display: flex; justify-content: center;">
+
+  <ImageGallery images={[
+    { src: Record1, alt: '出院记录',caption: '出院记录截图说明'},
+    { src: Record2, alt: '出院疾病诊断证明书', caption: '出院疾病诊断证明书截图说明' },
+    { src: Record3, alt: '出院证明', caption: '出院证明截图说明' },
+  ]} />
+</div>
+</div>
 
 <div class="m-3 pt-3" style="border:1px solid #ccc; padding: 1.5rem; border-radius: 5px;">
 <span class="text-xl font-bold text-center block pb-5">本页面贡献人员列表(非常感谢)</span>
