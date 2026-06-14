@@ -256,4 +256,3 @@ body {
 @keyframes holoSpin {
 	to { --holo-angle: 360deg; }
 }
-
