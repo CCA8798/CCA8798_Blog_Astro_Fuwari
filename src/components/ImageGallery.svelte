@@ -68,7 +68,7 @@ onMount(() => {
 </script>
 
 {#if images.length > 0}
-	<div class="not-prose" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem;">
+	<div class="not-prose" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; justify-content: center;">
 		{#each images as img, i}
 			<button
 				onclick={() => open(i)}

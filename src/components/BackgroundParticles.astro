@@ -24,12 +24,7 @@
   const ctx = canvas.getContext("2d");
 
   let running = false;
-  const COUNT = 80;
-
-  function isHomePage() {
-    const path = window.location.pathname.replace(/\/+$/, "");
-    return path === "" || /^\/page(\/\d+)?\/?$/.test(path);
-  }
+  const COUNT = 160;
 
   function getHue() {
     return (
@@ -70,8 +65,8 @@
         const dx = particles[i].x - particles[j].x;
         const dy = particles[i].y - particles[j].y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 200) {
-          const o = (1 - dist / 200) * 0.2;
+        if (dist < 250) {
+          const o = (1 - dist / 250) * 0.25;
           ctx.beginPath();
           ctx.moveTo(particles[i].x, particles[i].y);
           ctx.lineTo(particles[j].x, particles[j].y);
@@ -115,24 +110,7 @@
     }
   }
 
-  function stop() {
-    running = false;
-  }
-
-  if (isHomePage()) start();
-
-  function setupSwupHooks() {
-    if (!window.swup) return;
-    window.swup.hooks.on("page:view", () => {
-      if (isHomePage()) start();
-      else stop();
-    });
-  }
-  if (window.swup) {
-    setupSwupHooks();
-  } else {
-    document.addEventListener("swup:enable", setupSwupHooks);
-  }
+  start();
 
   animate();
 })();
