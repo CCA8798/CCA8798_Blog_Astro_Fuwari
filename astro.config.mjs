@@ -188,6 +188,9 @@ export default defineConfig({
 	},
 	adapter: node({ mode: "standalone" }),
 	vite: {
+		optimizeDeps: {
+			exclude: ["svelte", "photoswipe"],
+		},
 		build: {
 			rollupOptions: {
 				onwarn(warning, warn) {

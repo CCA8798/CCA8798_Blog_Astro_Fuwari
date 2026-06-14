@@ -17,6 +17,9 @@ pnpm-debug.log*
 .env
 .env.production
 
+# ssl certificates (local only)
+ssl/
+
 # macOS-specific files
 .DS_Store
 
