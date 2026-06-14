@@ -10,9 +10,16 @@ archived: false
 author: CCA8798
 ---
 import { Image } from 'astro:assets';
+import ImageGallery from '@/components/ImageGallery.svelte'
 import ImageDoctor from './贾艳滨.png';
 import ImageDepartment from './精神医学科牌子.jpg';
 import ImageDepartment2 from './精神医学科牌子2.jpg';
+import Record1 from './Record1.png';
+import Record2 from './Record2.png';
+import Record3 from './Record3.png';
+import Price1 from './Price1.png';
+import SeveralPeople1 from './SeveralPeople1.jpg';
+import SeveralPeople2 from './SeveralPeople2.jpg';
 import Markdown from "@components/misc/Markdown.astro";
 
 {/* <span class="text-center justify-center"><h1>就诊</h1></span> */}
@@ -225,6 +232,82 @@ import Markdown from "@components/misc/Markdown.astro";
 2. <span id="避免乘坐电梯" class="text-bg">暨大总院的电梯十分坐牢(人特别多，且经常停靠无人进出的楼层)</span>
 </div>
 
+<div class="m-3" style="border:1px solid #ccc; padding: 1.5rem; border-radius: 5px;">
+    <span class="text-xl font-bold">住院期间</span>
+
+    
+
+    :::TIP
+    - 住院前三天左右会要求完成诸多检查，部分血液及影像学检查需要前一天晚上空腹，遵医嘱即可(胃肠消化不好的建议提前空腹，否则<spoiler>会被彩超医生问“你真的空腹了吗？！”</spoiler>)
+    - 每天早上9:00~11:00左右会有医生查房，查房时会提问一些有关身体状况的问题；贾医生一般是一周查一次房，其余则是黄医生及赖医生等副主任医师、主治医师负责
+    - 住院期间会有团体心理治疗/个人心理治疗，具体取决于贾艳滨开出的单子，团体治疗时不喜欢的提问可以跳过，个人治疗则需要在门诊时向贾艳滨提出相关诉求
+    - 住院期间每天会有“敲头”(即颅脑刺激治疗)、“夹耳朵”(即颅微电流刺激疗法CES)、中药敷肚子、病情严重还有可能接受电休克治疗(ECT)等治疗项目，建议提前做好心理准备
+    :::
+    
+    贾艳滨查房会带着一大堆医学生及医师：
+    <details class="text-lg">
+    <summary style="padding:0.5rem">贾艳滨舞王僵尸般的恐怖场景(点击展开)</summary>
+    <ImageGallery images={[
+    { src: SeveralPeople1, alt: '贾艳滨的查房团1', caption: '贾艳滨医生带着一大堆医学生及医师查房的场景(站长住院期间拍摄)' },
+    { src: SeveralPeople2, alt: '贾艳滨的查房团2', caption: '贾艳滨医生带着一大堆医学生及医师查房的场景(站长住院期间拍摄)' },
+    ]} />
+    </details>
+    
+    
+    住院前几天检查的项目包括但不限于：
+
+    <div class="text-lg border border-gray-300 rounded-lg px-8 flex-1 text-center">
+| 检查项目(血液检查) |
+|------|
+| 阿立哌唑血药浓度组套 |
+| 喹硫平血药浓度测定 |
+| HLA-B1502 |
+| 血清泌乳素测定 |
+| 甲状腺功能测定三项 |
+| 丙戊酸钠血药浓度测定 |
+| 肝功一组 |
+| 生化八项 |
+| 心肌酶六项 |
+| 血常规-五分类 |
+| 粪便常规+OB |
+| TH1/TH2相关细胞因子五项 (IL-2, IL-4, IL-10, TNF-α, IFN-γ) |
+| 糖化血红蛋白测定(色谱法) |
+| 艾丙梅血清标志物检测 |
+| 乙肝定量五项 |
+| 血清铁蛋白测定 |
+| 糖尿病二项 |
+| 甲状腺功能检测六项(含TrAb) |
+| 性激素六项(含孕酮) |
+| 凝血四项 |
+| 血浆皮质醇测定 |
+| 血浆促肾上腺皮质激素测定 |
+| 血常规-五分类 |
+| 超敏C反应蛋白测定 |
+| 血脂五项 |
+| 血清白蛋白测定-化学法 |
+| 肾功四项 |
+| 肝功一组 |
+| 电解质(含钾、钠、氯、总二氧化碳、钙、镁、铁、磷) |
+| 心功三项 |
+| 尿液分析 |
+
+| 检查项目(影像学检查) |
+|------|
+| 颅脑MR平扫+MRA |
+| DR胸部正侧位片 |
+| 彩超心脏 |
+| 甲状腺、甲状旁腺及引流区淋巴结彩超 |
+| 肝胆胰脾彩超 |
+| 男性泌尿系(含前列腺)彩超 |
+| 常规心电图15导联 |
+    </div>
+</div>
+{/* 
+<ImageGallery images={[
+  { src: Record1, alt: '主界面' },
+  { src: Record2, alt: '设置页面', caption: '设置页面截图说明' },
+  { src: Record3, alt: '统计图表' },
+]} /> */}
 
 <span class="text-center justify-center pt-5 block pb-5"><i>======住院及复诊相关部分会在站长住完院后补充❤️======</i></span>
 
