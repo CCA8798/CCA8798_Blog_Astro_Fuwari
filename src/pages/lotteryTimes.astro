@@ -1,10 +1,7 @@
 ---
 // src/pages/dashboard.astro
 
-import { getEntry, render } from "astro:content";
 import Markdown from "@components/misc/Markdown.astro";
-import I18nKey from "../i18n/i18nKey";
-import { i18n } from "../i18n/translation";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 ---
 
@@ -32,7 +29,7 @@ import MainGridLayout from "../layouts/MainGridLayout.astro";
 </MainGridLayout>
 
 <script>
-function renderNames(names) {
+function renderNames(names: string[]) {
   const container = document.getElementById('names-container');
   if (!container) return;
 
@@ -64,7 +61,7 @@ function renderNames(names) {
 }
 
   // 防止 XSS（虽然 JSON 数据应该是安全的，但保留好习惯）
-  function escapeHtml(text) {
+  function escapeHtml(text: string) {
     const div = document.createElement('div');
     div.appendChild(document.createTextNode(text));
     return div.innerHTML;

@@ -1,6 +1,9 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection } from "astro:content";
+import { glob } from "astro/loaders";
+import { z } from "astro/zod";
 
 const postsCollection = defineCollection({
+	loader: glob({ pattern: "**/*.{md,mdx}", base: "src/content/posts" }),
 	schema: z.object({
 		title: z.string(),
 		published: z.date(),
@@ -10,12 +13,10 @@ const postsCollection = defineCollection({
 		author: z.string().optional().default(""),
 		image: z.string().optional().default(""),
 		tags: z.array(z.string()).optional().default([]),
-		category: z.string().optional().nullable().default(""),
+		category: z.string().optional().default(""),
 		lang: z.string().optional().default(""),
-		archived: z.boolean().default(false).optional(), // 确保这一行存在
-		showCover: z.boolean().default(false).optional(), // 添加这一行
-
-		/* For internal use */
+		archived: z.boolean().default(false).optional(),
+		showCover: z.boolean().default(false).optional(),
 		prevTitle: z.string().default(""),
 		prevSlug: z.string().default(""),
 		nextTitle: z.string().default(""),
@@ -23,6 +24,7 @@ const postsCollection = defineCollection({
 	}),
 });
 const specCollection = defineCollection({
+	loader: glob({ pattern: "**/*.{md,mdx}", base: "src/content/spec" }),
 	schema: z.object({}),
 });
 export const collections = {
