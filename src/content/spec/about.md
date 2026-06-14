@@ -40,11 +40,11 @@ MTF/X🍥<br>
 ***特别强调：***
 有2台服务器<br>
 >***现在/曾经有的身份：***
+>
 > - Cpp Coder
 > - Fandom Backrooms CN区写手
 > - 一个生电服务器的运维
 > - CNC平台 S1管制员
-
 
 <figure style="max-width: 200px; margin: 0 auto; text-align: center;">
   <Image src="/posts/about/images/trans.png" alt="我是半MTF" style="width: 100%;" />
@@ -55,16 +55,28 @@ MTF/X🍥<br>
 
 **QT项目**
 
-:::tip
+:::tip[Qt控制台]
 这是一坨显而易见的垃圾代码
 ::github{repo="CCA8798/ConsoleInQt"}
 :::
 
 **C++项目**
 
-:::tip
+:::tip[抽奖机]
 一个没有难度的项目 打算迁移到Qt Fluent
 ::github{repo="CCA8798/Simple_ID_Lottery"}
+:::
+
+**Web项目**
+
+:::TIP[本博客站点]
+这是本博客的源码仓库
+::github{repo="CCA8798/CCA8798_Blog_Astro_Fuwari"}
+:::
+
+:::TIP[海洋生态保护作业]
+纯纯是一滩Vibe Coding出来的勾史
+::github{repo="CCA8798/Ocean-Protection"}
 :::
 
 <div style="display: flex; align-items: center; justify-content: center;">
