@@ -71,7 +71,10 @@ export default defineConfig({
 			// the default value `transition-` cause transition delay
 			// when the Tailwind class `transition-all` is used
 			containers: ["main", "#toc"],
-			smoothScrolling: true,
+			smoothScrolling: {
+				animateScroll: { samePageWithHash: true },
+				offset: () => window.innerHeight / 2,
+			},
 			cache: true,
 			preload: true,
 			accessibility: true,
