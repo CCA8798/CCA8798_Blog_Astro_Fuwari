@@ -89,6 +89,24 @@ feat(server): add GET /api/status and GET /api/status/update endpoints
 2. `pnpm check` — no new errors
 3. Only intended files staged (`git status` to verify)
 
+### Network Proxy
+
+当 GitHub 网络不通时，本地有 HTTP 代理（端口 **7897**，HTTP/S 通用）：
+
+```bash
+git config http.proxy http://127.0.0.1:7897
+git config https.proxy http://127.0.0.1:7897
+# gh CLI 需要通过环境变量
+$env:HTTP_PROXY="http://127.0.0.1:7897"; $env:HTTPS_PROXY="http://127.0.0.1:7897"
+```
+
+操作完成后建议清除代理配置：
+
+```bash
+git config --unset http.proxy
+git config --unset https.proxy
+```
+
 ## 交互要求
 
 - Thinking思考过程用中文表述
