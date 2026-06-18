@@ -13,10 +13,10 @@ importers:
         version: 0.9.9(prettier@3.8.3)(typescript@5.9.3)
       '@astrojs/mdx':
         specifier: ^6.0.3
-        version: 6.0.3(astro@6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))
+        version: 6.0.3(astro@6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))
       '@astrojs/node':
         specifier: ^10.1.4
-        version: 10.1.4(astro@6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))
+        version: 10.1.4(astro@6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))
       '@astrojs/rss':
         specifier: ^4.0.18
         version: 4.0.18
@@ -25,10 +25,10 @@ importers:
         version: 3.7.3
       '@astrojs/svelte':
         specifier: 8.1.2
-        version: 8.1.2(@types/node@25.9.1)(astro@6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))(jiti@1.21.7)(lightningcss@1.32.0)(stylus@0.64.0)(svelte@5.56.3)(terser@5.47.1)(typescript@5.9.3)(yaml@2.9.0)
+        version: 8.1.2(@types/node@25.9.1)(astro@6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))(jiti@1.21.7)(lightningcss@1.32.0)(stylus@0.64.0)(svelte@5.56.3)(terser@5.47.1)(typescript@5.9.3)(yaml@2.9.0)
       '@astrojs/tailwind':
         specifier: ^6.0.2
-        version: 6.0.2(astro@6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))(tailwindcss@3.4.19(yaml@2.9.0))
+        version: 6.0.2(astro@6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))(tailwindcss@3.4.19(yaml@2.9.0))
       '@expressive-code/core':
         specifier: ^0.43.1
         version: 0.43.1
@@ -66,11 +66,11 @@ importers:
         specifier: ^0.5.20
         version: 0.5.20(tailwindcss@3.4.19(yaml@2.9.0))
       astro:
-        specifier: 6.4.7
-        version: 6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0)
+        specifier: 6.4.8
+        version: 6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0)
       astro-expressive-code:
         specifier: ^0.43.1
-        version: 0.43.1(astro@6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))
+        version: 0.43.1(astro@6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))
       astro-icon:
         specifier: ^1.1.5
         version: 1.1.5
@@ -2063,8 +2063,8 @@ packages:
   astro-icon@1.1.5:
     resolution: {integrity: sha512-CJYS5nWOw9jz4RpGWmzNQY7D0y2ZZacH7atL2K9DeJXJVaz7/5WrxeyIxO8KASk1jCM96Q4LjRx/F3R+InjJrw==}
 
-  astro@6.4.7:
-    resolution: {integrity: sha512-5vsXx0H52u23Jpshs9tM81D03Tb3Oh2Vt2Zo0bpqjXN+njkAWjFyGjTfmWJLAcrCQd9Q+iWB1eqfhR1sZJEaUA==}
+  astro@6.4.8:
+    resolution: {integrity: sha512-KK5lX90uU9EeVaTjINyj3sy9/NFXVa59aowaqbWBDDKLXZh4rr7GwIaCFYVetE22MJtsCNFerQXn0vlCLmpP/Q==}
     engines: {node: '>=22.12.0', npm: '>=9.6.5', pnpm: '>=7.1.0'}
     hasBin: true
 
@@ -5564,13 +5564,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@astrojs/mdx@6.0.3(astro@6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))':
+  '@astrojs/mdx@6.0.3(astro@6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))':
     dependencies:
       '@astrojs/internal-helpers': 0.10.0
       '@astrojs/markdown-remark': 7.2.0
       '@mdx-js/mdx': 3.1.1
       acorn: 8.16.0
-      astro: 6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0)
+      astro: 6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0)
       es-module-lexer: 2.1.0
       estree-util-visit: 2.0.0
       hast-util-to-html: 9.0.5
@@ -5584,10 +5584,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@astrojs/node@10.1.4(astro@6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))':
+  '@astrojs/node@10.1.4(astro@6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))':
     dependencies:
       '@astrojs/internal-helpers': 0.10.0
-      astro: 6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0)
+      astro: 6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0)
       send: 1.2.1
       server-destroy: 1.0.1
     transitivePeerDependencies:
@@ -5609,10 +5609,10 @@ snapshots:
       stream-replace-string: 2.0.0
       zod: 4.4.3
 
-  '@astrojs/svelte@8.1.2(@types/node@25.9.1)(astro@6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))(jiti@1.21.7)(lightningcss@1.32.0)(stylus@0.64.0)(svelte@5.56.3)(terser@5.47.1)(typescript@5.9.3)(yaml@2.9.0)':
+  '@astrojs/svelte@8.1.2(@types/node@25.9.1)(astro@6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))(jiti@1.21.7)(lightningcss@1.32.0)(stylus@0.64.0)(svelte@5.56.3)(terser@5.47.1)(typescript@5.9.3)(yaml@2.9.0)':
     dependencies:
       '@sveltejs/vite-plugin-svelte': 6.2.4(svelte@5.56.3)(vite@7.3.5(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))
-      astro: 6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0)
+      astro: 6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0)
       svelte: 5.56.3
       svelte2tsx: 0.7.56(svelte@5.56.3)(typescript@5.9.3)
       typescript: 5.9.3
@@ -5631,9 +5631,9 @@ snapshots:
       - tsx
       - yaml
 
-  '@astrojs/tailwind@6.0.2(astro@6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))(tailwindcss@3.4.19(yaml@2.9.0))':
+  '@astrojs/tailwind@6.0.2(astro@6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0))(tailwindcss@3.4.19(yaml@2.9.0))':
     dependencies:
-      astro: 6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0)
+      astro: 6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0)
       autoprefixer: 10.5.0(postcss@8.5.15)
       postcss: 8.5.15
       postcss-load-config: 4.0.2(postcss@8.5.15)
@@ -7527,9 +7527,9 @@ snapshots:
 
   astring@1.9.0: {}
 
-  astro-expressive-code@0.43.1(astro@6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0)):
+  astro-expressive-code@0.43.1(astro@6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0)):
     dependencies:
-      astro: 6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0)
+      astro: 6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0)
       rehype-expressive-code: 0.43.1
 
   astro-icon@1.1.5:
@@ -7540,7 +7540,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  astro@6.4.7(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0):
+  astro@6.4.8(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.80.0)(stylus@0.64.0)(terser@5.47.1)(yaml@2.9.0):
     dependencies:
       '@astrojs/compiler': 4.0.0
       '@astrojs/internal-helpers': 0.10.0
