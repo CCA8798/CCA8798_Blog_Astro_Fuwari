@@ -31,7 +31,7 @@ import Markdown from "@components/misc/Markdown.astro";
         <h2 id="挂号">挂号</h2>
     </center>
     </div>
-    <div class="space-y-4" style="white-space: pre-wrap;">
+    <div class="space-y-4">
         <div class="text-lg" style="border:1px solid #ccc; padding: 1.5rem; border-radius: 5px;">
                 <p>提前一周在“暨南大学附属第一医院”公众号进行预约挂号</p>
                 <p><b>挂号科室</b>：<b>精神医学科</b>(注意：贾医生在<b>阈下抑郁亚专科</b>也有出诊，尽量优先挂前者)</p>
@@ -47,18 +47,32 @@ import Markdown from "@components/misc/Markdown.astro";
                     <td >实名特诊号 300元</td>
                     </tr>
                     <tr>
-                    <td >周三</td>
-                    <td >实名特诊号 300元</td>
+                    <td >周三(两种号随机发)<br/>(概率发号/停诊)</td>
+                    <td >实名特诊号 300元/正教授号 50元</td>
                     </tr>
                     <tr>
-                    <td >周五(概率停诊)</td>
+                    <td >周四(概率发号/停诊)</td>
+                    <td >正教授号 50元</td>
+                    </tr>
+                    <tr>
+                    <td >周五(概率发号/停诊)</td>
                     <td >正教授号 50元</td>
                     </tr>
                 </table>
+                :::TIP
+                - 挂号已改成提前一周晚上6点放号
+                - 建议提前一周晚上5:50左右准备抢号
+                :::
+                :::CAUTION
+                - 平价号一般是周三/周四出诊
+                - 如果周三周四都放号，则其中一天有一定停诊风险
+                - 请留意支付/退款信息
+                - 停诊信息小程序不会醒目提醒
+                :::
             </div>
         </div>
     </div>
-    <div class="flex-1 self-start mt-17 md:mt-24 flex justify-center md:justify-end">
+    <div class="flex-1 start mt-17 md:mt-24 flex justify-center md:justify-end">
         <figure class="w-full max-w-xs">
             <Image src={ImageDoctor} alt="贾艳滨医生" class="rounded-lg shadow-md w-full" />
             <figcaption class="mt-2 text-sm text-center text-gray-500 dark:text-gray-400">
