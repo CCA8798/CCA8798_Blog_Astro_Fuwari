@@ -16,18 +16,13 @@ function readJSON<T>(file: string, fallback: T): T {
 	return fallback;
 }
 
-function getClientIP(request: Request): string {
-	return (
-		request.headers.get("x-forwarded-for") ||
-		request.headers.get("x-real-ip") ||
-		"127.0.0.1"
-	);
+function writeJSON(file: string, data: unknown): void {
+	fs.writeFileSync(file, JSON.stringify(data, null, 2), "utf-8");
 }
 
 export const prerender = false;
 
 export const GET: APIRoute = async ({ request }) => {
-	const ip = getClientIP(request);
 	const authHeader = request.headers.get("authorization");
 	if (!authHeader || !authHeader.startsWith("Bearer ")) {
 		return new Response(JSON.stringify({ loggedIn: false }), {
@@ -41,7 +36,15 @@ export const GET: APIRoute = async ({ request }) => {
 		Record<string, { ip: string; username: string; createdAt: number }>
 	>(SESSION_FILE, {});
 	const session = sessions[token];
-	if (!session || session.ip !== ip) {
+	if (!session) {
+		return new Response(JSON.stringify({ loggedIn: false }), {
+			status: 200,
+			headers: { "Content-Type": "application/json" },
+		});
+	}
+	if (Date.now() - session.createdAt > 86400000) {
+		delete sessions[token];
+		writeJSON(SESSION_FILE, sessions);
 		return new Response(JSON.stringify({ loggedIn: false }), {
 			status: 200,
 			headers: { "Content-Type": "application/json" },

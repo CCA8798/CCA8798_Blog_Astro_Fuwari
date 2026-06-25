@@ -352,7 +352,6 @@ function validateSession(token, ip) {
 		writeJSON(SESSION_FILE, sessions);
 		return null;
 	}
-	if (session.ip !== ip) return null;
 	return session;
 }
 
@@ -363,10 +362,9 @@ function deleteSession(token) {
 }
 
 function requireAuth(req, res) {
-	const ip = getClientIP(req);
 	const bodyToken = req.body?.token;
 	if (!bodyToken) return null;
-	return validateSession(bodyToken, ip);
+	return validateSession(bodyToken);
 }
 
 function cleanupSessions() {

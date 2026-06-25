@@ -24,15 +24,20 @@
   const ctx = canvas.getContext("2d");
 
   let running = false;
-  const COUNT = 160;
+  const COUNT = 120;
+  const MAX_DIST = 250;
+  const MAX_DIST_SQ = MAX_DIST * MAX_DIST;
 
-  function getHue() {
-    return (
+  let cachedHue = 15;
+  function updateHue() {
+    cachedHue =
       parseFloat(
         getComputedStyle(document.documentElement).getPropertyValue("--hue"),
-      ) || 15
-    );
+      ) || 15;
   }
+  updateHue();
+  const hueObserver = new MutationObserver(updateHue);
+  hueObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["style"] });
 
   function resize() {
     canvas.width = window.innerWidth;
@@ -48,7 +53,6 @@
       size: Math.random() * 3 + 1.2,
       vx: (Math.random() - 0.5) * 0.35,
       vy: (Math.random() - 0.5) * 0.35,
-      opacity: Math.random() * 0.4 + 0.2,
     };
   }
 
@@ -58,47 +62,49 @@
     particles = Array.from({ length: COUNT }, createParticle);
   }
 
-  function drawConnections(hue = 0) {
-    if (!ctx) return;
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 250) {
-          const o = (1 - dist / 250) * 0.25;
-          ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.strokeStyle = `oklch(0.70 0.12 ${hue} / ${o})`;
-          ctx.lineWidth = 0.8;
-          ctx.stroke();
-        }
-      }
-    }
-  }
-
   function animate() {
     if (!running) {
       if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
       requestAnimationFrame(animate);
       return;
     }
-    const hue = getHue();
+    const hue = cachedHue;
     if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     for (const p of particles) {
       p.x += p.vx;
       p.y += p.vy;
       if (p.x < -10 || p.x > canvas.width + 10) p.vx *= -1;
       if (p.y < -10 || p.y > canvas.height + 10) p.vy *= -1;
-      if (ctx) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `oklch(0.70 0.16 ${hue} / ${p.opacity})`;
-        ctx.fill();
-      }
     }
-    drawConnections(hue);
+
+    if (ctx) {
+      // Draw connections — single path, single stroke
+      ctx.beginPath();
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          if (dx * dx + dy * dy < MAX_DIST_SQ) {
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+          }
+        }
+      }
+      ctx.strokeStyle = `oklch(0.70 0.12 ${hue} / 0.25)`;
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+
+      // Draw particles — single path, single fill
+      ctx.beginPath();
+      for (const p of particles) {
+        ctx.moveTo(p.x + p.size, p.y);
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      }
+      ctx.fillStyle = `oklch(0.70 0.16 ${hue} / 0.4)`;
+      ctx.fill();
+    }
+
     requestAnimationFrame(animate);
   }
 

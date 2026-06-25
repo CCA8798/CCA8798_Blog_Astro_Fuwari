@@ -368,7 +368,6 @@ function createSession(ip: string, username: string): string {
 
 function validateSession(
 	token: string,
-	ip: string,
 ): { ip: string; username: string; createdAt: number } | null {
 	const sessions = readJSON<SessionData>(SESSION_FILE, {});
 	const session = sessions[token];
@@ -378,7 +377,6 @@ function validateSession(
 		writeJSON(SESSION_FILE, sessions);
 		return null;
 	}
-	if (session.ip !== ip) return null;
 	return session;
 }
 
@@ -688,7 +686,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 		}
 
 		// All other actions require token validation
-		const session = token ? validateSession(token, ip) : null;
+		const session = token ? validateSession(token) : null;
 		if (!session) {
 			return new Response(JSON.stringify({ error: "未登录或会话已过期" }), {
 				status: 401,
