@@ -21,14 +21,14 @@ let showDraftPrompt: boolean = $state(false);
 let hiddenFileInput: HTMLInputElement | null = $state(null);
 
 let md: MarkdownIt;
-let sanitize: typeof import("sanitize-html");
+let sanitize: any;
 let draftTimeout: NodeJS.Timeout;
 let previewTimeout: NodeJS.Timeout;
 
 onMount(async () => {
 	const MarkdownIt = (await import("markdown-it")).default;
 	const sanitizeHtml = (await import("sanitize-html")).default;
-	sanitize = sanitizeHtml as unknown as typeof import("sanitize-html");
+	sanitize = sanitizeHtml;
 	md = new MarkdownIt({ html: true, linkify: true });
 
 	const draft = localStorage.getItem(`draft:${slug}`);
