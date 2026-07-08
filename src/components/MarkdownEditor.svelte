@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 import { markdown } from "@codemirror/lang-markdown";
 import { Compartment, EditorState } from "@codemirror/state";
 import { oneDark } from "@codemirror/theme-one-dark";
@@ -137,8 +137,8 @@ function uploadImage() {
 }
 
 function handleFileSelect(e: Event) {
-	const input = e.target as HTMLInputElement;
-	const file = input.files?.[0];
+	const input = e.target;
+	const file = input?.files?.[0];
 	if (file) {
 		processImageUpload(file);
 	}
