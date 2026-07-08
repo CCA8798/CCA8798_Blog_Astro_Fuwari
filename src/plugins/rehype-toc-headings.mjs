@@ -20,9 +20,9 @@ export function rehypeTocHeadings() {
 			}
 		});
 
-		if (file.data?.astro?.frontmatter) {
-			file.data.astro.frontmatter.tocHeadings = headings;
-		}
+		file.data.astro = file.data.astro ?? {};
+		file.data.astro.frontmatter = file.data.astro.frontmatter ?? {};
+		file.data.astro.frontmatter.tocHeadings = headings;
 	};
 }
 

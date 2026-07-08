@@ -7,6 +7,7 @@ import {
 	getStoredTheme,
 	setTheme,
 } from "../utils/setting-utils";
+import MarkdownEditor from "./MarkdownEditor.svelte";
 
 interface HistoryEntry {
 	id: string;
@@ -943,10 +944,7 @@ function cancelDeleteUser() {
 				</div>
 				<div>
 					<label class="text-xs text-50 tracking-wide mb-1 block">正文（Markdown）</label>
-					<textarea bind:value={postBody} placeholder="在此编写文章内容…"
-						class="w-full px-3 py-2 border border-[var(--line-color)] rounded-lg text-sm min-h-[12rem] resize-y font-mono
-							focus:outline-none focus:border-[var(--primary)] focus:shadow-[0_0_0_1px_color-mix(in_srgb,var(--primary)_20%,transparent)]
-							transition" rows="12"></textarea>
+					<MarkdownEditor bind:value={postBody} slug={postSlug} />
 				</div>
 				{#if postError}
 					<div class="text-xs text-red-500 bg-red-500/10 border border-red-500/15 rounded-lg px-3 py-2">{postError}</div>

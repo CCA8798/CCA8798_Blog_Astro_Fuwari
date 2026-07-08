@@ -1208,6 +1208,91 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 			}
 		}
 
+		if (action === "postUploadImage") {
+			if (!hasPermission(currentUser, GROUPS.EDITOR)) {
+				return new Response(JSON.stringify({ error: "权限不足" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			if (!slug || typeof slug !== "string" || !slug.trim()) {
+				return new Response(JSON.stringify({ error: "slug 不能为空" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			const { filename, data } = body as { filename: string; data: string };
+			if (
+				!filename ||
+				typeof filename !== "string" ||
+				!data ||
+				typeof data !== "string"
+			) {
+				return new Response(
+					JSON.stringify({ error: "filename 或 data 缺失" }),
+					{
+						status: 400,
+						headers: { "Content-Type": "application/json" },
+					},
+				);
+			}
+
+			const base64Prefix = "data:image/";
+			if (!data.startsWith(base64Prefix)) {
+				return new Response(JSON.stringify({ error: "仅支持图片上传" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+
+			const semiColonIdx = data.indexOf(";");
+			const commaIdx = data.indexOf(",");
+			if (semiColonIdx === -1 || commaIdx === -1) {
+				return new Response(JSON.stringify({ error: "数据格式错误" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			const mimeType = data.slice(base64Prefix.length, semiColonIdx);
+			const base64Data = data.slice(commaIdx + 1);
+
+			const safeFilename = path
+				.basename(filename)
+				.replace(/[^a-zA-Z0-9._-]/g, "");
+			if (!safeFilename) {
+				return new Response(JSON.stringify({ error: "文件名无效" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+
+			const maxSize = 5 * 1024 * 1024;
+			const buffer = Buffer.from(base64Data, "base64");
+			if (buffer.length > maxSize) {
+				return new Response(JSON.stringify({ error: "文件大小超过 5MB" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+
+			const postDir = path.join(POSTS_DIR, slug.trim());
+			try {
+				fs.mkdirSync(postDir, { recursive: true });
+				const filePath = path.join(postDir, safeFilename);
+				fs.writeFileSync(filePath, buffer);
+				return new Response(JSON.stringify({ path: `./${safeFilename}` }), {
+					status: 200,
+					headers: { "Content-Type": "application/json" },
+				});
+			} catch (err) {
+				console.error("图片上传失败:", err);
+				return new Response(JSON.stringify({ error: "图片上传失败" }), {
+					status: 500,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+		}
+
 		return new Response(JSON.stringify({ error: "未知操作" }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" },
