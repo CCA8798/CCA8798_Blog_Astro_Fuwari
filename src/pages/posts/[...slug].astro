@@ -25,22 +25,29 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content, headings, remarkPluginFrontmatter } = await render(entry);
+
 const postImageBase = entry.filePath
 	? path.dirname(entry.filePath).replace(/^src[/\\]/, "") + "/"
 	: path.join("content/posts/", entry.id + "/");
 
-// Merge headings from rehype-toc-headings plugin (catches MDX JSX <h2> tags
-// that Astro's built-in heading extraction misses).
-// Use the more complete list as the source, deduplicating by slug.
+const extraHeadings = remarkPluginFrontmatter?.tocHeadings ?? [];
+
 const mergedHeadings = [...headings];
 const seen = new Set(headings.map((h) => h.slug));
-const extraHeadings = remarkPluginFrontmatter?.tocHeadings ?? [];
 for (const h of extraHeadings) {
 	if (!seen.has(h.slug)) {
 		mergedHeadings.push(h);
 		seen.add(h.slug);
 	}
 }
+
+console.log(`[TOC Debug] ${entry.id}:`, {
+	builtInHeadings: headings.length,
+	tocHeadings: extraHeadings.length,
+	mergedCount: mergedHeadings.length,
+	headings: headings.slice(0, 3),
+	extraHeadings: extraHeadings.slice(0, 3),
+});
 
 const jsonLd = {
 	"@context": "https://schema.org",

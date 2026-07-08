@@ -1,7 +1,8 @@
 <script lang="ts">
 import { markdown } from "@codemirror/lang-markdown";
-import { basicSetup, EditorState, EditorView } from "@codemirror/state";
+import { Compartment, EditorState } from "@codemirror/state";
 import { oneDark } from "@codemirror/theme-one-dark";
+import { basicSetup, EditorView } from "@codemirror/view";
 import type { MarkdownIt } from "markdown-it";
 import { onDestroy, onMount } from "svelte";
 
