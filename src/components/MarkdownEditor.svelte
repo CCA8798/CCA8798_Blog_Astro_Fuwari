@@ -1,29 +1,22 @@
 <script>
 import { markdown } from "@codemirror/lang-markdown";
-import { Compartment, EditorState } from "@codemirror/state";
+import { EditorState } from "@codemirror/state";
 import { oneDark } from "@codemirror/theme-one-dark";
-import { basicSetup, EditorView } from "@codemirror/view";
-import type { MarkdownIt } from "markdown-it";
+import { EditorView } from "@codemirror/view";
+import { basicSetup } from "codemirror";
 import { onDestroy, onMount } from "svelte";
 
-interface Props {
-	value: string;
-	slug: string;
-	onSave?: () => void;
-}
+let { value = "", slug, onSave } = $props();
+let editorView = $state(null);
+let previewHtml = $state("");
+let hasDraft = $state(false);
+let showDraftPrompt = $state(false);
+let hiddenFileInput = $state(null);
 
-let { value = "", slug, onSave }: Props = $props();
-let editorView: EditorView | null = $state(null);
-let previewHtml: string = $state("");
-let isFullscreen: boolean = $state(false);
-let hasDraft: boolean = $state(false);
-let showDraftPrompt: boolean = $state(false);
-let hiddenFileInput: HTMLInputElement | null = $state(null);
-
-let md: MarkdownIt;
-let sanitize: any;
-let draftTimeout: NodeJS.Timeout;
-let previewTimeout: NodeJS.Timeout;
+let md;
+let sanitize;
+let draftTimeout;
+let previewTimeout;
 
 onMount(async () => {
 	const MarkdownIt = (await import("markdown-it")).default;
@@ -59,7 +52,7 @@ onMount(async () => {
 				updateListener,
 			],
 		}),
-		parent: document.getElementById("editor-container")!,
+		parent: document.getElementById("editor-container"),
 	});
 
 	updatePreview();
@@ -109,7 +102,7 @@ function clearDraft() {
 	showDraftPrompt = false;
 }
 
-function wrapText(before: string, after: string) {
+function wrapText(before, after) {
 	const view = editorView;
 	if (!view) return;
 	const { from, to } = view.state.selection.main;
@@ -120,7 +113,7 @@ function wrapText(before: string, after: string) {
 	});
 }
 
-function insertAtLineStart(prefix: string) {
+function insertAtLineStart(prefix) {
 	const view = editorView;
 	if (!view) return;
 	const { from } = view.state.selection.main;
@@ -136,7 +129,7 @@ function uploadImage() {
 	}
 }
 
-function handleFileSelect(e: Event) {
+function handleFileSelect(e) {
 	const input = e.target;
 	const file = input?.files?.[0];
 	if (file) {
@@ -145,7 +138,7 @@ function handleFileSelect(e: Event) {
 	input.value = "";
 }
 
-async function processImageUpload(file: File) {
+async function processImageUpload(file) {
 	if (!file.type.startsWith("image/")) {
 		alert("请选择图片文件");
 		return;
@@ -157,7 +150,7 @@ async function processImageUpload(file: File) {
 
 	const reader = new FileReader();
 	reader.onload = async () => {
-		const base64 = reader.result as string;
+		const base64 = reader.result;
 		try {
 			const res = await fetch("/api/admin", {
 				method: "POST",
@@ -183,15 +176,11 @@ async function processImageUpload(file: File) {
 	reader.readAsDataURL(file);
 }
 
-function insertAtCursor(text: string) {
+function insertAtCursor(text) {
 	const view = editorView;
 	if (!view) return;
 	const { from } = view.state.selection.main;
 	view.dispatch({ changes: { from, to: from, insert: text } });
-}
-
-function toggleFullscreen() {
-	isFullscreen = !isFullscreen;
 }
 </script>
 
@@ -215,26 +204,26 @@ function toggleFullscreen() {
 </div>
 {/if}
 
-<div class:list={["markdown-editor", "flex flex-col border border-[var(--line-color)] rounded-lg bg-[var(--page-bg)]", "fixed inset-0 z-60 rounded-none": isFullscreen]}>
-	<div class="flex items-center gap-1 p-2 border-b border-[var(--line-color)] bg-[var(--card-bg)]">
-		<button onclick={() => wrapText("**", "**")} title="加粗" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition">B</button>
-		<button onclick={() => wrapText("*", "*")} title="斜体" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition">I</button>
-		<button onclick={() => insertAtLineStart("## ")} title="标题" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition">H</button>
-		<button onclick={() => wrapText("[", "](url)")} title="链接" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition">🔗</button>
-		<button onclick={uploadImage} title="上传图片" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition">🖼️</button>
-		<button onclick={() => wrapText("```", "```")} title="代码" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition">{'<>'}</button>
-		<button onclick={() => insertAtLineStart("> ")} title="引用" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition">"</button>
-		<button onclick={() => insertAtLineStart("- ")} title="列表" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition">•</button>
-		<button onclick={() => insertAtCursor("---\n")} title="分割线" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition">—</button>
+<div class="flex flex-col border border-[var(--line-color)] rounded-lg bg-[var(--page-bg)]">
+	<div class="flex items-center gap-1 p-2 border-b border-[var(--line-color)] bg-[var(--card-bg)] shrink-0">
+		<button onclick={() => wrapText("**", "**")} title="加粗" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition text-sm">B</button>
+		<button onclick={() => wrapText("*", "*")} title="斜体" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition text-sm italic">I</button>
+		<button onclick={() => insertAtLineStart("## ")} title="标题" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition text-sm">H</button>
+		<button onclick={() => wrapText("[", "](url)")} title="链接" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition text-sm">🔗</button>
+		<button onclick={uploadImage} title="上传图片" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition text-sm">🖼️</button>
+		<button onclick={() => wrapText("```", "```")} title="代码" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition text-sm">{'<>'}</button>
+		<button onclick={() => insertAtLineStart("> ")} title="引用" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition text-sm">"</button>
+		<button onclick={() => insertAtLineStart("- ")} title="列表" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition text-sm">•</button>
+		<button onclick={() => insertAtCursor("---\n")} title="分割线" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition text-sm">—</button>
 		<div class="flex-1"></div>
-		<button onclick={toggleFullscreen} title="全屏" class="px-2 py-1 rounded hover:bg-[var(--primary)] hover:text-white transition">⛶</button>
+		<button onclick={() => onSave?.()} title="保存" class="px-3 py-1 rounded text-sm font-medium bg-[var(--primary)] text-white hover:opacity-90 transition">保存</button>
 	</div>
 
-	<div class="flex-1 flex overflow-hidden">
-		<div class="w-1/2 h-full overflow-auto">
+	<div class="min-h-[30rem] flex overflow-hidden">
+		<div class="w-1/2 overflow-auto">
 			<div id="editor-container" class="h-full font-mono text-sm"></div>
 		</div>
-		<div class="w-1/2 h-full overflow-auto p-4 prose prose-sm dark:prose-invert max-w-none">
+		<div class="w-1/2 overflow-auto p-4 prose prose-sm dark:prose-invert max-w-none border-l border-[var(--line-color)]">
 			{@html previewHtml}
 		</div>
 	</div>
@@ -243,10 +232,7 @@ function toggleFullscreen() {
 </div>
 
 <style>
-	.markdown-editor {
-		min-height: 30rem;
-	}
-	.markdown-editor button {
+	button {
 		transition: all 0.15s ease;
 	}
 </style>
