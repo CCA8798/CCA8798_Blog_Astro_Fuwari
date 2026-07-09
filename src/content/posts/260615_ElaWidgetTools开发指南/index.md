@@ -9,10 +9,8 @@ archived: false
 author: CCA8798
 ---
 
-# ElaWidgetTools 开发文档(基础)
-
-> 基于 QT-Widget 开发的 FluentUI 风格组件库  
-> 仓库地址：https://github.com/Liniyous/ElaWidgetTools  
+> 基于 QT-Widget 开发的 FluentUI 风格组件库
+> 仓库地址：<https://github.com/Liniyous/ElaWidgetTools>
 > 支持 Qt 5.12+（Linux 需 5.15+），推荐 Qt 5.15.2 / Qt 6.6.2
 
 ---
@@ -2747,3 +2745,4 @@ treeView->setModel(treeModel);
 
 *文档版本: v1.0 — 基于 ElaWidgetTools v2.0.3*
 *Font Awesome 图标枚举 ElaIconType 包含数千个图标，详见 ElaDef.h 中的 ElaIconType::IconName 定义。*
+                                         
