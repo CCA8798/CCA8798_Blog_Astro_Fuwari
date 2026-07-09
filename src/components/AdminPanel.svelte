@@ -888,7 +888,7 @@ function cancelDeleteUser() {
 <!-- Post Editor Modal -->
 {#if showPostEditor}
 	<div class="fixed inset-0 z-50 bg-black/50 dark:bg-black/70 flex items-start justify-center pt-8 pb-8 overflow-y-auto" onclick={closePostEditor}>
-		<div class="admin-card w-full max-w-2xl mx-4 p-6 shadow-2xl text-left text-75" onclick={(e) => e.stopPropagation()}>
+		<div class="admin-card w-full max-w-5xl mx-4 p-6 shadow-2xl text-left text-75" onclick={(e) => e.stopPropagation()}>
 			<div class="flex items-center justify-between mb-5 pb-3 border-b border-dashed border-[var(--line-divider)]">
 				<h3 class="flex items-center gap-2 text-base font-semibold tracking-wider">
 					<span class="w-1 h-4 rounded-sm bg-[var(--primary)] flex-shrink-0"></span>
@@ -944,7 +944,7 @@ function cancelDeleteUser() {
 				</div>
 				<div>
 					<label class="text-xs text-50 tracking-wide mb-1 block">正文（Markdown）</label>
-					<MarkdownEditor bind:value={postBody} slug={postSlug} />
+					<MarkdownEditor bind:value={postBody} slug={postSlug} onSave={handleSavePost} />
 				</div>
 				{#if postError}
 					<div class="text-xs text-red-500 bg-red-500/10 border border-red-500/15 rounded-lg px-3 py-2">{postError}</div>
