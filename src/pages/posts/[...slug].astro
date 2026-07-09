@@ -41,14 +41,6 @@ for (const h of extraHeadings) {
 	}
 }
 
-console.log(`[TOC Debug] ${entry.id}:`, {
-	builtInHeadings: headings.length,
-	tocHeadings: extraHeadings.length,
-	mergedCount: mergedHeadings.length,
-	headings: headings.slice(0, 3),
-	extraHeadings: extraHeadings.slice(0, 3),
-});
-
 const jsonLd = {
 	"@context": "https://schema.org",
 	"@type": "BlogPosting",
