@@ -1,0 +1,35 @@
+# Auto-detect text files and normalize line endings to LF
+* text=auto
+
+# Force LF for known text files
+*.astro text eol=lf
+*.svelte text eol=lf
+*.ts text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.css text eol=lf
+*.styl text eol=lf
+*.md text eol=lf
+*.mdx text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.html text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.cpp text eol=lf
+
+# Binary files should remain as-is
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff2 binary
+*.otf binary
+*.crt binary
+*.key binary
+*.db binary
+*.db-shm binary
+*.db-wal binary

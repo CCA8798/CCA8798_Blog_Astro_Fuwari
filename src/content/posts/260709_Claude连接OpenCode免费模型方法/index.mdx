@@ -1,0 +1,173 @@
+---
+title: Claude连接OpenCode免费模型方法
+published: 2026-07-09T21:00:00+08:00
+description: "Claude连接OpenCode免费模型方法"
+tags: ["AI","Claude","OpenCode"]
+category: 技术
+draft: false
+archived: false
+author: CCA8798
+---
+
+import { Image } from 'astro:assets';
+import Markdown from "@components/misc/Markdown.astro";
+import InstallDesktop1 from "./InstallDesktop1.png";
+import InstallCLI1 from "./InstallCLI1.png";
+import CCSwitchUI from "./CCSwitchUI.png";
+import InstallProxy1 from "./InstallProxy1.png";
+import Init1 from "./Init1.png";
+import Init2 from "./Init2.png";
+import Init3 from "./Init3.png";
+import Init4 from "./Init4.png";
+import Init5 from "./Init5.png";
+
+<Markdown class="prose dark:prose-invert">
+:::TIP
+- 本篇旨在帮助没有经济能力使用付费模型的Vibe Coder，不涉及任何违法行为
+- 本篇所分享内容不保证时效性(至少在2026/7/9本篇发布时有效)
+- 本篇所分享内容适用于Windows系统，其他系统仅供参考
+- 开始前请保证已正确安装npm
+:::
+<div class="m-3" style="border:1px solid #ccc; padding: 1.5rem; padding-top: 0rem; border-radius: 5px;">
+<h3 class="text-xl font-bold" id="安装Claude及Claude CLI">安装Claude及Claude CLI</h3>
+
+Claude官网：<a href="https://code.claude.com/">https://code.claude.com/</a>
+
+<h4 class="text-lg font-bold" id="安装Claude桌面版">安装Claude桌面版</h4>
+1. 下载Claude桌面版安装包
+<figure class="w-full max-w-full">
+<Image src={InstallDesktop1} alt="安装Claude桌面版" />
+<figcaption class="mt-2 text-sm text-center text-gray-500 dark:text-gray-400">
+            安装Claude桌面版入口
+            </figcaption>
+</figure>
+2. 一直点"下一步"即可完成安装
+
+<h4 class="text-lg font-bold" id="安装Claude CLI">安装Claude CLI</h4>
+1. 按Win+R输入cmd或PowerShell
+2. 输入以下命令安装Claude CLI (cmd/PowerShell有不同安装方式)
+
+cmd:
+```cmd
+curl -fsSL https://claude.ai/install.cmd -o install.cmd&&install.cmd&&del install.cmd
+```
+
+PowerShell:
+```powershell
+irm https://claude.ai/install.ps1 | iex
+```
+
+完成后输入以下命令检查安装是否成功(应该输出版本号)
+```bash
+claude --version
+```
+
+</div>
+<div class="m-3" style="border:1px solid #ccc; padding: 1.5rem; padding-top: 0rem; border-radius: 5px;">
+<h3 class="text-xl font-bold" id="安装CC Switch及opencode-free-proxy">安装CC Switch及opencode-free-proxy</h3>
+
+<h4 class="text-lg font-bold" id="安装CC Switch">安装CC Switch</h4>
+
+CC Switch官网：<a href="https://www.ccswitch.io/zh/">https://www.ccswitch.io/zh/</a>
+
+CC Switch仓库：<a href="https://github.com/farion1231/cc-switch/releases">https://github.com/farion1231/cc-switch/releases</a>
+
+1. 下载CC Switch安装包
+
+2. 根据安装程序指引安装CC Switch即可
+<figure class="w-full max-w-full">
+<Image src={CCSwitchUI} alt="CC Switch UI" />
+<figcaption class="mt-2 text-sm text-center text-gray-500 dark:text-gray-400">
+            CCSwitch主界面
+</figcaption></figure>
+</div>
+
+<div class="m-3" style="border:1px solid #ccc; padding: 1.5rem; padding-top: 0rem; border-radius: 5px;">
+<h4 class="text-lg font-bold" id="安装opencode-free-proxy">安装opencode-free-proxy</h4>
+
+1. 先CD到想安装到的目录(请确保目录存在)
+
+```bash
+cd (此处替换为你想安装到的目录)
+```
+
+2. 开始安装
+
+:::TIP
+- 此后每次重启电脑使用该连接方法都需要按照步骤启动服务
+- 可用pm2管理自启动
+:::
+
+分别运行以下命令：
+
+(1) 克隆仓库
+```bash
+git clone https://github.com/bigdata2211it-web/opencode-free-proxy.git
+```
+(2) 进入仓库目录
+```bash
+cd opencode-free-proxy
+```
+(3) 安装依赖
+```bash
+npm install
+```
+(4) 启动
+```bash
+node server.mjs
+```
+:::WARNING
+不要关掉运行窗口(否则服务会直接终止，且后续步骤还需要用到此窗口)
+:::
+</div>
+
+<div class="m-3" style="border:1px solid #ccc; padding: 1.5rem; padding-top: 0rem; border-radius: 5px;">
+<h3 class="text-xl font-bold" id="配置代理服务">配置代理服务</h3>
+<h4 class="text-lg font-bold" id="配置CC Switch">配置CC Switch</h4>
+1. 打开CC Switch主界面
+2. 点击上方选择栏，左侧是CLI，右侧是桌面版，按需选择
+3. 点击右上角加号
+<figure class="w-full max-w-full">
+<Image src={Init1} alt="配置CC Switch"/>
+<figcaption class="mt-2 text-sm text-center text-gray-500 dark:text-gray-400">
+            配置CC Switch
+</figcaption></figure>
+4. 预设供应商选择“自定义配置”后下滑
+5. 供应商名字随便输
+6. API KEY按照当时安装opencode-free-proxy时的提示信息填写，复制admin一栏即可(admin权限最高)
+7. 请求地址同样按照提示信息填写，但是要加上后缀“/v1”(如图)
+<figure class="w-full max-w-full">
+<Image src={InstallProxy1} alt="安装opencode-free-proxy"/>
+<figcaption class="mt-2 text-sm text-center text-gray-500 dark:text-gray-400">
+            PowerShell安装opencode-free-proxy时的提示信息
+</figcaption></figure>
+
+<figure class="w-full max-w-full">
+<Image src={Init2} alt="配置CC Switch模型"/>
+<figcaption class="mt-2 text-sm text-center text-gray-500 dark:text-gray-400">
+            配置CC Switch模型
+</figcaption></figure>
+8. 模型映射可点击“获取模型列表”，然后如图按需填写
+<figure class="w-full max-w-full">
+<Image src={Init3} alt="配置CC Switch模型映射"/>
+<figcaption class="mt-2 text-sm text-center text-gray-500 dark:text-gray-400">
+            配置CC Switch模型映射
+</figcaption></figure>
+9. 其余可保持默认，点击右下角“保存”
+10. 返回主界面后，点击右上角“设置”图标->“路由”->“本地路由”
+11. 如图打开所需开关(可自行配置端口号等)
+<figure class="w-full max-w-full">
+<Image src={Init4} alt="配置CC Switch路由"/>
+<figcaption class="mt-2 text-sm text-center text-gray-500 dark:text-gray-400">
+            配置CC Switch路由
+</figcaption></figure>
+12. 返回主界面，点击启用刚才配置的模型
+<figure class="w-full max-w-full">
+<Image src={Init5} alt="配置CC Switch"/>
+<figcaption class="mt-2 text-sm text-center text-gray-500 dark:text-gray-400">
+            配置CC Switch
+</figcaption></figure>
+13. 测试是否能够正常使用(命令行用“claude”命令进入，桌面版直接打开即可)
+14. Enjoy!
+</div>
+</Markdown>
