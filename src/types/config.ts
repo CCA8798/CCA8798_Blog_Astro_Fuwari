@@ -36,6 +36,15 @@ export type SiteConfig = {
 	};
 
 	favicon: Favicon[];
+
+	ogImage?: {
+		src: string;
+	};
+	keywords?: string[];
+	verification?: {
+		google?: string;
+		baidu?: string;
+	};
 };
 
 export type Favicon = {

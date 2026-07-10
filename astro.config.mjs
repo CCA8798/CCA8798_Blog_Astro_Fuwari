@@ -136,7 +136,40 @@ export default defineConfig({
 			},
 		}),
 		svelte(),
-		sitemap(),
+		sitemap({
+			filter: (page) => {
+				const { pathname } = new URL(page);
+				const excluded = [
+					"/admin/",
+					"/login/",
+					"/register/",
+					"/404/",
+					"/lotteryTimes/",
+					"/status-history/",
+				];
+				return !excluded.some((p) => pathname.startsWith(p));
+			},
+			serialize: (item) => {
+				const url = new URL(item.url);
+				if (url.pathname === "/" || url.pathname === "") {
+					item.priority = 1.0;
+					item.changefreq = "daily";
+				} else if (url.pathname.startsWith("/posts/")) {
+					item.priority = 0.8;
+					item.changefreq = "weekly";
+				} else if (url.pathname.startsWith("/archive/")) {
+					item.priority = 0.4;
+					item.changefreq = "monthly";
+				} else if (url.pathname.startsWith("/about/")) {
+					item.priority = 0.5;
+					item.changefreq = "monthly";
+				} else {
+					item.priority = 0.4;
+					item.changefreq = "monthly";
+				}
+				return item;
+			},
+		}),
 		mdx({
 			remarkPlugins: [
 				remarkMath,

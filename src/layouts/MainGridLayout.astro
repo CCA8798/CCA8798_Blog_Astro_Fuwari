@@ -3,6 +3,7 @@ import BackToTop from "@components/control/BackToTop.astro";
 import Footer from "@components/Footer.astro";
 import Navbar from "@components/Navbar.astro";
 import StatusBar from "@components/StatusBar.svelte";
+import BreadcrumbJsonLd from "@components/widget/BreadcrumbJsonLd.astro";
 import SideBar from "@components/widget/SideBar.astro";
 import type { MarkdownHeading } from "astro";
 import { Icon } from "astro-icon/components";
@@ -17,6 +18,11 @@ import {
 import { pathsEqual, url } from "../utils/url-utils";
 import Layout from "./Layout.astro";
 
+interface BreadcrumbItem {
+	name: string;
+	path: string;
+}
+
 interface Props {
 	title?: string;
 	banner?: string;
@@ -24,6 +30,13 @@ interface Props {
 	lang?: string;
 	setOGTypeArticle?: boolean;
 	headings?: MarkdownHeading[];
+	image?: string;
+	tags?: string[];
+	published?: Date;
+	updated?: Date;
+	author?: string;
+	breadcrumbItems?: BreadcrumbItem[];
+	noindex?: boolean;
 }
 
 const {
@@ -33,6 +46,13 @@ const {
 	lang,
 	setOGTypeArticle,
 	headings = [],
+	image,
+	tags,
+	published,
+	updated,
+	author,
+	breadcrumbItems,
+	noindex,
 } = Astro.props;
 const hasBannerCredit =
 	siteConfig.banner.enable && siteConfig.banner.credit.enable;
@@ -46,7 +66,9 @@ const mainPanelTop =
 		: "8rem";
 ---
 
-<Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle}>
+<Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle} image={image} tags={tags} published={published} updated={updated} author={author} noindex={noindex}>
+
+<BreadcrumbJsonLd items={breadcrumbItems} />
 
 <!-- Navbar -->
 <slot slot="head" name="head"></slot>

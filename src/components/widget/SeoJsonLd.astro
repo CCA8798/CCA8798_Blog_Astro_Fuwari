@@ -1,0 +1,37 @@
+---
+import { profileConfig, siteConfig } from "@/config";
+
+const siteUrl = Astro.site;
+if (!siteUrl) throw new Error("Astro.site is not defined");
+
+const webSite = {
+	"@type": "WebSite",
+	name: siteConfig.title,
+	url: siteUrl.href,
+	description: siteConfig.subtitle,
+};
+
+const sameAs = profileConfig.links
+	.filter((link) => /^https?:\/\//.test(link.url))
+	.map((link) => link.url);
+
+const person = {
+	"@type": "Person",
+	name: profileConfig.name,
+	url: siteUrl.href,
+	image: {
+		"@type": "ImageObject",
+		url: profileConfig.avatar
+			? new URL(profileConfig.avatar, siteUrl).href
+			: undefined,
+	},
+	sameAs: sameAs.length > 0 ? sameAs : undefined,
+};
+
+const graph = {
+	"@context": "https://schema.org",
+	"@graph": [webSite, person],
+};
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(graph)}></script>
