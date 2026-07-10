@@ -1,5 +1,6 @@
 ---
 import BackToTop from "@components/control/BackToTop.astro";
+import BreadcrumbJsonLd from "@components/widget/BreadcrumbJsonLd.astro";
 import Footer from "@components/Footer.astro";
 import Navbar from "@components/Navbar.astro";
 import StatusBar from "@components/StatusBar.svelte";
@@ -57,6 +58,8 @@ const mainPanelTop =
 ---
 
 <Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle} image={image} tags={tags} published={published} updated={updated} author={author}>
+
+<BreadcrumbJsonLd />
 
 <!-- Navbar -->
 <slot slot="head" name="head"></slot>

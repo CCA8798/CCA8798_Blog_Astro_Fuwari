@@ -1,0 +1,56 @@
+---
+import { siteConfig } from "@/config";
+import { pathsEqual, url } from "@utils/url-utils";
+
+interface BreadcrumbItem {
+	name: string;
+	path: string;
+}
+
+interface Props {
+	items?: BreadcrumbItem[];
+}
+
+const { items = [] } = Astro.props;
+const currentPath = Astro.url.pathname;
+
+// Always start with Home
+const breadcrumbs: BreadcrumbItem[] = [
+	{ name: siteConfig.title, path: url("/") },
+];
+
+// If custom items provided, append them (skip duplicates of home)
+for (const item of items) {
+	if (!pathsEqual(item.path, url("/"))) {
+		breadcrumbs.push(item);
+	}
+}
+
+// Auto-append current page as leaf if not already present
+const lastItem = breadcrumbs[breadcrumbs.length - 1];
+if (!lastItem || !pathsEqual(lastItem.path, currentPath)) {
+	const segments = currentPath.replace(/\/$/, "").split("/").filter(Boolean);
+	const leafName = segments[segments.length - 1] || "";
+	if (leafName) {
+		breadcrumbs.push({
+			name: decodeURIComponent(leafName),
+			path: currentPath,
+		});
+	}
+}
+
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "BreadcrumbList",
+	itemListElement: breadcrumbs.map((item, index) => ({
+		"@type": "ListItem",
+		position: index + 1,
+		name: item.name,
+		item: new URL(item.path, Astro.url).href,
+	})),
+};
+---
+
+{jsonLd.itemListElement.length > 1 && (
+	<script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+)}
