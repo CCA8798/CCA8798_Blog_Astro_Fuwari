@@ -37,6 +37,14 @@ export const siteConfig: SiteConfig = {
 			//   sizes: '32x32',              // (Optional) Size of the favicon, set only if you have favicons of different sizes
 		},
 	],
+	ogImage: {
+		src: "assets/images/blurred-banner.png",
+	},
+	keywords: ["blog", "CCA8798", "技术", "个人博客"],
+	verification: {
+		// google: "YOUR_GOOGLE_VERIFICATION_CODE",
+		// baidu: "YOUR_BAIDU_VERIFICATION_CODE",
+	},
 };
 
 export const navBarConfig: NavBarConfig = {
