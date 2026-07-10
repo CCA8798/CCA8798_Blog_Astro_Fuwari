@@ -5,6 +5,7 @@ import "@fontsource/roboto/700.css";
 
 import BackgroundParticles from "@components/BackgroundParticles.astro";
 import ConfigCarrier from "@components/ConfigCarrier.astro";
+import SeoJsonLd from "@components/widget/SeoJsonLd.astro";
 import { profileConfig, siteConfig } from "@/config";
 import {
 	AUTO_MODE,
@@ -35,9 +36,22 @@ interface Props {
 	published?: Date;
 	updated?: Date;
 	author?: string;
+	noindex?: boolean;
 }
 
-let { title, banner, description, lang, setOGTypeArticle, image, tags, published, updated, author } = Astro.props;
+let {
+	title,
+	banner,
+	description,
+	lang,
+	setOGTypeArticle,
+	image,
+	tags,
+	published,
+	updated,
+	author,
+	noindex,
+} = Astro.props;
 
 // apply a class to the body element to decide the height of the banner, only used for initial page load
 // Swup can update the body for each page visit, but it's after the page transition, causing a delay for banner height change
@@ -92,9 +106,14 @@ const ogImageSrc = image || siteConfig.ogImage?.src;
 
 		<link rel="canonical" href={Astro.url}>
 
+		<link rel="alternate" href={new URL(Astro.url.pathname, Astro.site).href} hreflang="x-default">
+		<link rel="preconnect" href="https://open-meteo.com">
+		<link rel="preconnect" href="https://v1.hitokoto.cn">
+
 		<meta charset="UTF-8" />
 		<meta name="description" content={description || pageTitle}>
 		<meta name="author" content={profileConfig.name}>
+		{noindex && <meta name="robots" content="noindex">}
 		{tags && tags.length > 0
 			? <meta name="keywords" content={tags.join(", ")}>
 			: siteConfig.keywords && <meta name="keywords" content={siteConfig.keywords.join(", ")}>
@@ -187,6 +206,7 @@ const ogImageSrc = image || siteConfig.ogImage?.src;
 		<slot name="head"></slot>
 
 		<link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
+		<SeoJsonLd />
 
 	</head>
 	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
@@ -264,19 +284,6 @@ import {
 	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT
 } from "../constants/constants";
 import { siteConfig } from '../config';
-
-/* Preload fonts */
-// (async function() {
-// 	try {
-// 		await Promise.all([
-// 			document.fonts.load("400 1em Roboto"),
-// 			document.fonts.load("700 1em Roboto"),
-// 		]);
-// 		document.body.classList.remove("hidden");
-// 	} catch (error) {
-// 		console.log("Failed to load fonts:", error);
-// 	}
-// })();
 
 /* TODO This is a temporary solution for style flicker issue when the transition is activated */
 /* issue link: https://github.com/withastro/astro/issues/8711, the solution get from here too */
