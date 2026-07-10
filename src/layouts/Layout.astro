@@ -30,9 +30,14 @@ interface Props {
 	description?: string;
 	lang?: string;
 	setOGTypeArticle?: boolean;
+	image?: string;
+	tags?: string[];
+	published?: Date;
+	updated?: Date;
+	author?: string;
 }
 
-let { title, banner, description, lang, setOGTypeArticle } = Astro.props;
+let { title, banner, description, lang, setOGTypeArticle, image, tags, published, updated, author } = Astro.props;
 
 // apply a class to the body element to decide the height of the banner, only used for initial page load
 // Swup can update the body for each page visit, but it's after the page transition, causing a delay for banner height change
@@ -74,6 +79,8 @@ const bannerOffsetByPosition = {
 };
 const bannerOffset =
 	bannerOffsetByPosition[siteConfig.banner.position || "center"];
+
+const ogImageSrc = image || siteConfig.ogImage?.src;
 ---
 
 <!DOCTYPE html>
@@ -83,9 +90,16 @@ const bannerOffset =
 	<head>
 		<title>{pageTitle}</title>
 
+		<link rel="canonical" href={Astro.url}>
+
 		<meta charset="UTF-8" />
 		<meta name="description" content={description || pageTitle}>
 		<meta name="author" content={profileConfig.name}>
+		{tags && tags.length > 0
+			? <meta name="keywords" content={tags.join(", ")}>
+			: siteConfig.keywords && <meta name="keywords" content={siteConfig.keywords.join(", ")}>
+		}
+		<meta property="og:locale" content={siteLang}>
 
 		<meta property="og:site_name" content={siteConfig.title}>
 		<meta property="og:url" content={Astro.url}>
@@ -97,10 +111,26 @@ const bannerOffset =
         <meta property="og:type" content="website" />
         )}
 
+		{/* OG image for social sharing */}
+		{ogImageSrc && <>
+			<meta property="og:image" content={new URL(ogImageSrc, Astro.url)}>
+			<meta property="og:image:width" content="1200">
+			<meta property="og:image:height" content="630">
+			<meta name="twitter:image" content={new URL(ogImageSrc, Astro.url)}>
+		</>}
+
 		<meta name="twitter:card" content="summary_large_image">
 		<meta property="twitter:url" content={Astro.url}>
 		<meta name="twitter:title" content={pageTitle}>
 		<meta name="twitter:description" content={description || pageTitle}>
+
+		{/* Article-specific OG tags */}
+		{setOGTypeArticle && <>
+			{published && <meta property="article:published_time" content={published.toISOString()}>}
+			{updated && <meta property="article:modified_time" content={updated.toISOString()}>}
+			{tags?.map(tag => <meta property="article:tag" content={tag}>)}
+			{author && <meta property="article:author" content={author}>}
+		</>}
 
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
@@ -145,6 +175,14 @@ const bannerOffset =
 			'page-width': `${PAGE_WIDTH}rem`,
 		}}></style>  <!-- defines global css variables. This will be applied to <html> <body> and some other elements idk why -->
 
+
+		{/* Search console verification */}
+		{siteConfig.verification?.google && (
+			<meta name="google-site-verification" content={siteConfig.verification.google}>
+		)}
+		{siteConfig.verification?.baidu && (
+			<meta name="baidu-site-verification" content={siteConfig.verification.baidu}>
+		)}
 
 		<slot name="head"></slot>
 
