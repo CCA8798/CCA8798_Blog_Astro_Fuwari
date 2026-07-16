@@ -48,14 +48,14 @@ importers:
         specifier: ^6.43.6
         version: 6.43.6
       '@expressive-code/core':
-        specifier: ^0.43.1
-        version: 0.43.1
+        specifier: ^0.44.0
+        version: 0.44.0
       '@expressive-code/plugin-collapsible-sections':
-        specifier: ^0.43.1
-        version: 0.43.1
+        specifier: ^0.44.0
+        version: 0.44.0
       '@expressive-code/plugin-line-numbers':
-        specifier: ^0.43.1
-        version: 0.43.1
+        specifier: ^0.44.0
+        version: 0.44.0
       '@fontsource-variable/jetbrains-mono':
         specifier: ^5.2.8
         version: 5.2.8
@@ -1162,20 +1162,17 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@expressive-code/core@0.43.1':
-    resolution: {integrity: sha512-H4rUJXKyS6y2q9Ig9bIp3dFhWhkZQIeH/jRGl3DROlslrGvfD4OC9qzmvKEFExm+/DtdvvHMQ8/Olmrcfxp+wQ==}
-
   '@expressive-code/core@0.44.0':
     resolution: {integrity: sha512-xgiF2P6tYUbrhi3+x0S8xHZWT1t3Bvb3U91tAtRbLb9HLejLvYc5GZUqKICKLaUN4iSGhhNJu2fM/aH8e5yCMg==}
 
-  '@expressive-code/plugin-collapsible-sections@0.43.1':
-    resolution: {integrity: sha512-9jsa3AWnZ3p8yCSExLwsuG85KnMdhHJBU4t94Aq3svZ9mKqqaERNaSuSTQWEiyCrL/ME3aSLwuRMLHYIKCoUPw==}
+  '@expressive-code/plugin-collapsible-sections@0.44.0':
+    resolution: {integrity: sha512-dK8axLBt0uXPaifZUZ0ZxVL/QjlqSatBds8xdXh8ecLsjXO55uQ+igK9yyI+BtU/gb/sZggcST8Ya5VNyCjH0g==}
 
   '@expressive-code/plugin-frames@0.44.0':
     resolution: {integrity: sha512-V6M6+zVc1GzqCvXkQHc2m5rcFOIVzJgMq5gnfrMnVf2gwtj/sg4H93c1f/mGeqHycubwkHFUDyParAOiGeDZeA==}
 
-  '@expressive-code/plugin-line-numbers@0.43.1':
-    resolution: {integrity: sha512-rSeDxOMC9/8DyOSdkrISSkIub3/vPvEL4RIoACMJAiH6K+ivTWEpio0atCH8R6CfL+Ab1KMYE0O4rMj006Pe4A==}
+  '@expressive-code/plugin-line-numbers@0.44.0':
+    resolution: {integrity: sha512-jZbCinT19JTZ1TCl18vGZBAgbNcegkWQjsuvqEDN2OeAlCqcSFE62j9d70+fk2zUd8nHnEgXF214D3a+STsrAQ==}
 
   '@expressive-code/plugin-shiki@0.44.0':
     resolution: {integrity: sha512-RZsdaqlbGqyAQKuoX4myQXxjmiE2l5KBpJ/gKPh62tCdIdpWyjbzVqSo8+5XsezZxkfi8AJ/J6EUaBTPROFX/Q==}
@@ -2059,8 +2056,8 @@ packages:
   '@ungap/structured-clone@1.3.1':
     resolution: {integrity: sha512-mUFwbeTqrVgDQxFveS+df2yfap6iuP20NAKAsBt5jDEoOTDew+zwLAOilHCeQJOVSvmgCX4ogqIrA0mnyr08yQ==}
 
-  '@ungap/structured-clone@1.3.2':
-    resolution: {integrity: sha512-5jsZFwgR5rTdKwidH9Qmat75RKwqfpKlWWB1frDkljN127mwqBu8K0PYo7/hFpF03IEJpfVPpCQDY/eDx3iHvA==}
+  '@ungap/structured-clone@1.3.3':
+    resolution: {integrity: sha512-60YRaenCQcVjYEKOcG824+DRGGIQ3VKErcBoAEDJZz5bKIs2ZG+X/H9Nk+Q6EVkwJk5QNApxbrc5QtBSwtrXAg==}
 
   '@volar/kit@2.4.28':
     resolution: {integrity: sha512-cKX4vK9dtZvDRaAzeoUdaAJEew6IdxHNCRrdp5Kvcl6zZOqb6jTOfk3kXkIkG3T7oTFXguEMt5+9ptyqYR84Pg==}
@@ -3939,8 +3936,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  nanoid@3.3.15:
-    resolution: {integrity: sha512-y7Wygv/7mEOvxTuEQDB8StXdMRBWf1kR/tlhAzBRUFkB2jfcLOAxO/SHmOO2zgz1pVgK29/kyupn059/bCHdjA==}
+  nanoid@3.3.16:
+    resolution: {integrity: sha512-bzlKTyNJ7+LdGIIwy8ijFpIqEQIvafahV7eYykJ8Cvh42EdJeODoJ6gUJXpQJvej1BddH8OqTXZNE/KfbWAu8Q==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -4492,8 +4489,8 @@ packages:
     resolution: {integrity: sha512-FfR8sjd4em2T6fb3I2MwAJU7HWVMr9zba+enmQeeWFfCbm+UOC/0X4DS8XtpUTMwWMGbjKYP7xjfNekzyGmB3A==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postcss@8.5.16:
-    resolution: {integrity: sha512-vuwillviilfKZsg0VGj5R/YwwcHx4SLsIOI/7K6mQkWx+l5cUHTjj5g0AasTBcyXsbfTgrwsUNmVUb5xVwyPwg==}
+  postcss@8.5.19:
+    resolution: {integrity: sha512-Mz8SaolMd8nB+G13WkORcxQKHZ/NE4xXevtkJHVuG+guo9/wYKlIMTKAqGdEmYOXR2ijPjTYNHssizdaVSUNdQ==}
     engines: {node: ^10 || ^12 || >=14}
 
   postcss@8.5.19:
@@ -6865,18 +6862,6 @@ snapshots:
   '@esbuild/win32-x64@0.27.7':
     optional: true
 
-  '@expressive-code/core@0.43.1':
-    dependencies:
-      '@ctrl/tinycolor': 4.2.0
-      hast-util-select: 6.0.4
-      hast-util-to-html: 9.0.5
-      hast-util-to-text: 4.0.2
-      hastscript: 9.0.1
-      postcss: 8.5.16
-      postcss-nested: 6.2.0(postcss@8.5.16)
-      unist-util-visit: 5.1.0
-      unist-util-visit-parents: 6.0.2
-
   '@expressive-code/core@0.44.0':
     dependencies:
       '@ctrl/tinycolor': 4.2.0
@@ -6889,17 +6874,17 @@ snapshots:
       unist-util-visit: 5.1.0
       unist-util-visit-parents: 6.0.2
 
-  '@expressive-code/plugin-collapsible-sections@0.43.1':
+  '@expressive-code/plugin-collapsible-sections@0.44.0':
     dependencies:
-      '@expressive-code/core': 0.43.1
+      '@expressive-code/core': 0.44.0
 
   '@expressive-code/plugin-frames@0.44.0':
     dependencies:
       '@expressive-code/core': 0.44.0
 
-  '@expressive-code/plugin-line-numbers@0.43.1':
+  '@expressive-code/plugin-line-numbers@0.44.0':
     dependencies:
-      '@expressive-code/core': 0.43.1
+      '@expressive-code/core': 0.44.0
 
   '@expressive-code/plugin-shiki@0.44.0':
     dependencies:
@@ -7787,7 +7772,7 @@ snapshots:
 
   '@ungap/structured-clone@1.3.1': {}
 
-  '@ungap/structured-clone@1.3.2': {}
+  '@ungap/structured-clone@1.3.3': {}
 
   '@volar/kit@2.4.28(typescript@5.9.3)':
     dependencies:
@@ -9928,7 +9913,7 @@ snapshots:
     dependencies:
       '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
-      '@ungap/structured-clone': 1.3.2
+      '@ungap/structured-clone': 1.3.3
       devlop: 1.1.0
       micromark-util-sanitize-uri: 2.0.1
       trim-lines: 3.0.1
@@ -10358,7 +10343,7 @@ snapshots:
 
   nanoid@3.3.12: {}
 
-  nanoid@3.3.15: {}
+  nanoid@3.3.16: {}
 
   nanoid@3.3.16: {}
 
@@ -10755,9 +10740,9 @@ snapshots:
       postcss: 8.5.15
       postcss-selector-parser: 6.1.4
 
-  postcss-nested@6.2.0(postcss@8.5.16):
+  postcss-nested@6.2.0(postcss@8.5.19):
     dependencies:
-      postcss: 8.5.16
+      postcss: 8.5.19
       postcss-selector-parser: 6.1.4
 
   postcss-nested@6.2.0(postcss@8.5.19):
@@ -10879,9 +10864,9 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postcss@8.5.16:
+  postcss@8.5.19:
     dependencies:
-      nanoid: 3.3.15
+      nanoid: 3.3.16
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
