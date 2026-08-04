@@ -40,10 +40,6 @@ export default defineConfig({
 	server: {
 		port: 4321,
 		allowedHosts: ["home.cca8798.com", "www.cca8798.com"], // 将 'your-hostname.com' 替换为你要允许的主机名
-		https: {
-			key: fs.readFileSync(path.resolve(__dirname, "ssl/key.key")),
-			cert: fs.readFileSync(path.resolve(__dirname, "ssl/crt.crt")),
-		},
 	},
 	fonts: [
 		{
@@ -277,6 +273,12 @@ export default defineConfig({
 	},
 	adapter: node({ mode: "standalone" }),
 	vite: {
+		server: {
+			https: {
+				key: fs.readFileSync(path.resolve(__dirname, "ssl/key.key")),
+				cert: fs.readFileSync(path.resolve(__dirname, "ssl/crt.crt")),
+			},
+		},
 		optimizeDeps: {
 			exclude: ["svelte", "photoswipe"],
 		},
