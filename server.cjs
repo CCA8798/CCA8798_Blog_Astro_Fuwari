@@ -891,6 +891,25 @@ app.get('/{*path}', (req, res) => {
 
 const port = 4321;
 initUsers();
-app.listen(port, () => {
+
+// --- HTTPS support ---
+// Use ssl/key.key + ssl/crt.crt when present (e.g. Cloudflare Origin Certificate),
+// otherwise fall back to plain HTTP.
+const SSL_KEY = path.join(__dirname, 'ssl', 'key.key');
+const SSL_CERT = path.join(__dirname, 'ssl', 'crt.crt');
+
+let server;
+if (fs.existsSync(SSL_KEY) && fs.existsSync(SSL_CERT)) {
+	const https = require('https');
+	const key = fs.readFileSync(SSL_KEY);
+	const cert = fs.readFileSync(SSL_CERT);
+	server = https.createServer({ key, cert }, app);
+	console.log('HTTPS mode: ssl/key.key + ssl/crt.crt loaded');
+} else {
+	server = require('http').createServer(app);
+	console.log('HTTP mode: no ssl certificates found (fallback)');
+}
+
+server.listen(port, () => {
 	console.log(`Server running on port ${port}`);
 });
