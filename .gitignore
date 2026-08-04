@@ -48,5 +48,8 @@ build/
 # runtime logs (start.ps1)
 logs/
 
+# pm2 per-machine config (contains server token)
+ecosystem.config.cjs
+
 # opencode session state
 .omo/
