@@ -44,3 +44,9 @@ users.json
 
 #build
 build/
+
+# runtime logs (start.ps1)
+logs/
+
+# opencode session state
+.omo/
