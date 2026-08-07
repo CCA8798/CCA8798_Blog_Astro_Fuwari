@@ -43,6 +43,26 @@ export function rehypeTocHeadings() {
 							.replace(/^-|-$/g, "");
 					headings.push({ depth, slug, text });
 				}
+				return;
+			}
+
+			// Custom bordered components (e.g. <CustomBorder1 title="...">):
+			// the inner <h3> is generated at component-render time, so it is not
+			// visible as a heading while processing the MDX tree. Instead, surface
+			// the component's `title` attribute as a heading entry (depth 3, matching
+			// the <h3> rendered by the component), with slug equal to the raw title
+			// so TOC anchors resolve to the real element id (`id={title}`).
+			const isMdxJsx =
+				node.type === "mdxJsxFlowElement" || node.type === "mdxJsxTextElement";
+			if (isMdxJsx && node.name && /^CustomBorder/i.test(node.name) && Array.isArray(node.attributes)) {
+				const titleAttr = node.attributes.find(
+					(a) => a.type === "mdxJsxAttribute" && a.name === "title",
+				);
+				const title =
+					typeof titleAttr?.value === "string" ? titleAttr.value : undefined;
+				if (title) {
+					headings.push({ depth: 3, slug: title, text: title });
+				}
 			}
 		});
 

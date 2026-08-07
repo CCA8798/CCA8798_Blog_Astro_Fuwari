@@ -22,6 +22,7 @@ import Price2 from './Price2.png';
 import SeveralPeople1 from './SeveralPeople1.jpg';
 import SeveralPeople2 from './SeveralPeople2.jpg';
 import Markdown from "@components/misc/Markdown.astro";
+import CustomBorder1 from '@components/misc/CustomBorder1.astro'
 
 {/* <span class="text-center justify-center"><h1>就诊</h1></span> */}
 <div class="flex flex-col md:flex-row gap-6">
@@ -97,8 +98,9 @@ import Markdown from "@components/misc/Markdown.astro";
 - 如果你在几周内在别的医院(如佛山精卫)做过量表，可以直接给问诊台护士拿报告(记得带)
 :::
 
-<div class="m-3" style="border:1px solid #ccc; padding: 1.5rem; padding-top: 0rem; border-radius: 5px;">
-<h3 class="text-xl font-bold" id="找到门诊和完成首诊量表">找到门诊和完成首诊量表</h3>
+<CustomBorder1 title="找到门诊和完成首诊量表">
+{/* <div class="m-3" style="border:1px solid #ccc; padding: 1.5rem; padding-top: 0rem; border-radius: 5px;">
+<h3 class="text-xl font-bold" id="找到门诊和完成首诊量表">找到门诊和完成首诊量表</h3> */}
 
 驱车到达医院之后直接按照导引指示到精神医学科门诊<b>(医院结构很复杂，要仔细找)</b>
 
@@ -115,11 +117,9 @@ import Markdown from "@components/misc/Markdown.astro";
   </div>
   <p class="mt-4 text-sm text-center text-gray-500 dark:text-gray-400">精神医学科门诊</p>
 </div>
-</div>
+</CustomBorder1>
 
-<div class="m-3" style="border:1px solid #ccc; padding: 1.5rem; padding-top: 0rem; border-radius: 5px;">
-<h3 class="text-xl font-bold" id="首诊问询">首诊问询</h3>
-
+<CustomBorder1 title="首诊问询">
 完成量表填写后，问诊台护士会帮忙联系首诊问询的医生，会被叫到一个小房间里问各种详细的情况
 
 :::TIP
@@ -138,12 +138,9 @@ import Markdown from "@components/misc/Markdown.astro";
 <div style="padding:0.5rem;">4.首诊问询的医生有概率和你吐槽贾医生的号很贵/她被当做免费劳动力等东西，真的很温柔有趣，强推</div>
 </div>
 </details>
+</CustomBorder1>
 
-</div>
-
-<div class="m-3" style="border:1px solid #ccc; padding: 1.5rem; padding-top: 0rem; border-radius: 5px;">
-<h3 class="text-xl font-bold" id="贾艳滨医生问诊环节">贾艳滨医生问诊环节</h3>
-
+<CustomBorder1 title="贾艳滨医生问诊环节">
 首诊问询结束后，你就可以坐在旁边的座位上等叫号了，叫到名字的时候直接进去就行
 
 贾医生会问你想不想要家长一起坐，站长选择的是家长坐在旁边
@@ -164,25 +161,21 @@ import Markdown from "@components/misc/Markdown.astro";
 - 如果和站长一样有双相+重抑+中焦+自杀倾向+跨性别的话，贾医生有概率会开住院(住院可以玩手机，但未成年需要至少一位家长24小时陪护)
 - 如果有双相/躁狂症状，贾医生会给你开喹硫平和丙戊酸钠(如果和站长一样吃舍曲林会引起强烈的胃肠道反应应明确告知，总体而言贾医生比佛山精卫医生专业得多)
 :::
+</CustomBorder1>
 
-</div>
-
-<div class="m-3" style="border:1px solid #ccc; padding: 1.5rem; padding-top: 0rem; border-radius: 5px;">
-<h3 class="text-xl font-bold" id="缴费">缴费</h3>
-
+<CustomBorder1 title="缴费">
 至于这一部分，站长是让家长帮忙缴的(笑)
 
 一般而言，就是贾医生会开单，单上有缴费的二维码，按照指示完成缴费即可
 
 如果开了住院单，缴费完之后择日或当日去住院部办理手续即可
-</div>
+</CustomBorder1>
 
 <center>
     <h2 id="住院">住院</h2>
 </center>
 
-<div class="m-3" style="border:1px solid #ccc; padding: 1.5rem; padding-top: 0rem; border-radius: 5px;">
-<h3 class="text-xl font-bold" id="办理入院">办理入院</h3>
+<CustomBorder1 title="办理入院">
 :::WARNING
 - 由于珠三角跨性别人士的数量与友跨且有记载的医生完全不在一个数量级，且暨大总院大概率会将未成年跨性别安排到“儿童与青少年心理健康中心”病区住院，若有延迟住院的打算，请务必在预计入院时间前至少预留3天预约(<b><i>站长等了1周</i></b>)
 - 若年龄过低(如站长14岁)，住完院的出院诊断有概率不会写任何有关跨性别的字样，包括最容易开到的“性别不清”
@@ -206,10 +199,9 @@ import Markdown from "@components/misc/Markdown.astro";
 - 住院需要缴纳押金，请务必准备好足够的资金(站长住院总共花费约<i>10000￥</i>)
 - 缴纳押金的渠道在“暨南大学附属第一医院”公众号内的“住院押金”部分，可以自定义缴纳金额，会作为住院时开销的预存款
 :::
-</div>
+</CustomBorder1>
 
-<div class="m-3" style="border:1px solid #ccc; padding: 1.5rem; padding-top: 0rem; border-radius: 5px;">
-<h3 class="text-xl font-bold" id="入院整备">入院整备</h3>
+<CustomBorder1 title="入院整备">
 
 ~~医院不是酒店~~，但是你应该像入住酒店一样准备好需要的物资
 
@@ -256,11 +248,9 @@ import Markdown from "@components/misc/Markdown.astro";
 1. <span id="公共吹风筒" class="text-bg">儿童与青少年心理健康中心病区的护士站有公共吹风筒提供</span>
 
 2. <span id="避免乘坐电梯" class="text-bg">暨大总院的电梯十分坐牢(人特别多，且经常停靠无人进出的楼层)</span>
-</div>
+</CustomBorder1>
 
-<div class="m-3" style="border:1px solid #ccc; padding: 1.5rem; padding-top: 0rem; border-radius: 5px;">
-    <h3 class="text-xl font-bold" id="住院期间">住院期间</h3>
-
+<CustomBorder1 title="住院期间">
     :::TIP
     - 住院前三天左右会要求完成诸多检查，部分血液及影像学检查需要前一天晚上空腹，遵医嘱即可(胃肠消化不好的建议提前空腹，否则<spoiler>会被彩超医生问“你真的空腹了吗？！”</spoiler>)
     - 每天早上9:00~11:00左右会有医生查房，查房时会提问一些有关身体状况的问题；贾医生一般是一周查一次房，其余则是黄医生及赖医生等副主任医师、主治医师负责
@@ -327,12 +317,9 @@ import Markdown from "@components/misc/Markdown.astro";
 | 男性泌尿系(含前列腺)彩超 |
 | 常规心电图15导联 |
     </div>
-</div>
+</CustomBorder1>
 
-
-<div class="m-3" style="border:1px solid #ccc; padding: 1.5rem; padding-top: 0rem; border-radius: 5px;">
-    <h3 class="text-xl font-bold" id="出院">出院</h3>
-
+<CustomBorder1 title="出院">
 出院主要取决于当前病情是否稳定，所以尽量不要让医生/护士发现割手的痕迹
 
 如果一切都良好并且做完上文提到的检查，并且指标没有出现异常的话，可以自行申请出院
@@ -353,7 +340,7 @@ import Markdown from "@components/misc/Markdown.astro";
     { src: Record3, alt: '出院证明', caption: '出院证明截图说明' },
   ]} />
 </div>
-</div>
+</CustomBorder1>
 
 <div class="m-3 pt-3" style="border:1px solid #ccc; padding: 1.5rem; padding-top: 0rem; border-radius: 5px;">
 <h3 class="text-xl font-bold text-center block pb-5" id="本页面贡献人员列表(非常感谢)">本页面贡献人员列表(非常感谢)</h3>

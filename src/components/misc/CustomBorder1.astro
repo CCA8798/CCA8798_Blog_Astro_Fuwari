@@ -1,0 +1,18 @@
+---
+// CustomBorder1 — 可复用的带标题边框容器组件
+// 用法（MDX 中）：
+//   import CustomBorder1 from '@components/misc/CustomBorder1.astro'
+//   <CustomBorder1 title="自定义标题">正文内容</CustomBorder1>
+//   或空内容自闭合：<CustomBorder1 title="自定义标题" />
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<div class="m-3 border border-solid border-white p-6 pt-0 rounded-md">
+	<h3 class="text-xl font-bold" id={title}>{title}</h3>
+	<slot />
+</div>
