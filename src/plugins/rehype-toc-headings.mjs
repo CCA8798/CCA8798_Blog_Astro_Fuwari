@@ -54,7 +54,12 @@ export function rehypeTocHeadings() {
 			// so TOC anchors resolve to the real element id (`id={title}`).
 			const isMdxJsx =
 				node.type === "mdxJsxFlowElement" || node.type === "mdxJsxTextElement";
-			if (isMdxJsx && node.name && /^CustomBorder/i.test(node.name) && Array.isArray(node.attributes)) {
+			if (
+				isMdxJsx &&
+				node.name &&
+				/^CustomBorder/i.test(node.name) &&
+				Array.isArray(node.attributes)
+			) {
 				const titleAttr = node.attributes.find(
 					(a) => a.type === "mdxJsxAttribute" && a.name === "title",
 				);
