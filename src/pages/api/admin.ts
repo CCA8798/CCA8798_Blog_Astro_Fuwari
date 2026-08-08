@@ -1,7 +1,18 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import type { APIRoute } from "astro";
+
+// Waline 共享运行时（与 server.cjs / astro dev 中间件共用）
+const require = createRequire(import.meta.url);
+const waline = require("../../../waline-runtime.cjs") as {
+	mintWalineToken: (
+		username: string,
+		displayName: string,
+		group: string,
+	) => string;
+};
 
 const STATUS_FILE = path.resolve("status.json");
 const RATE_LIMIT_FILE = path.resolve("rate-limit.json");
@@ -580,6 +591,11 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 						displayName: regDisplay,
 						group: GROUPS.VIEWER,
 					},
+					walineToken: waline.mintWalineToken(
+						regUser,
+						regDisplay,
+						GROUPS.VIEWER,
+					),
 				}),
 				{ status: 200, headers: { "Content-Type": "application/json" } },
 			);
@@ -643,6 +659,11 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 								(user.displayName as string) || (user.username as string),
 							group: user.group,
 						},
+						walineToken: waline.mintWalineToken(
+							user.username as string,
+							(user.displayName as string) || (user.username as string),
+							(user.group as string) || GROUPS.VIEWER,
+						),
 					}),
 					{ status: 200, headers: { "Content-Type": "application/json" } },
 				);
@@ -664,6 +685,11 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 							displayName: "捌拐玖捌",
 							group: "admin",
 						},
+						walineToken: waline.mintWalineToken(
+							"CCA8798",
+							"捌拐玖捌",
+							GROUPS.ADMIN,
+						),
 					}),
 					{ status: 200, headers: { "Content-Type": "application/json" } },
 				);
@@ -706,6 +732,63 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 				status: 200,
 				headers: { "Content-Type": "application/json" },
 			});
+		}
+
+		// ---- Profile update (own account, no group/username change) ----
+		if (action === "profileUpdate") {
+			const newDisplayName = ((body.displayName as string) || "").trim();
+			const newBio = (body.bio as string) || "";
+			const newPassword = body.password as string;
+			const newConfirm = body.confirmPassword as string;
+
+			if (newPassword) {
+				if (newPassword.length < 6) {
+					return new Response(JSON.stringify({ error: "密码至少 6 个字符" }), {
+						status: 400,
+						headers: { "Content-Type": "application/json" },
+					});
+				}
+				if (newPassword !== newConfirm) {
+					return new Response(JSON.stringify({ error: "两次密码输入不一致" }), {
+						status: 400,
+						headers: { "Content-Type": "application/json" },
+					});
+				}
+			}
+
+			const users = readUsers() || [];
+			const idx = users.findIndex((u) => u.username === currentUser);
+			if (idx === -1) {
+				return new Response(JSON.stringify({ error: "用户不存在" }), {
+					status: 404,
+					headers: { "Content-Type": "application/json" },
+				});
+			}
+			if (body.displayName !== undefined && newDisplayName !== "")
+				users[idx].displayName = newDisplayName;
+			if (body.bio !== undefined) users[idx].bio = newBio;
+			if (newPassword) users[idx].password = hashPassword(newPassword);
+			writeUsers(users);
+
+			const updated = users[idx];
+			const updatedDisplayName = (updated.displayName as string) || currentUser;
+			return new Response(
+				JSON.stringify({
+					success: true,
+					user: {
+						username: updated.username,
+						displayName: updatedDisplayName,
+						group: updated.group,
+						bio: updated.bio || "",
+					},
+					walineToken: waline.mintWalineToken(
+						updated.username as string,
+						updatedDisplayName,
+						(updated.group as string) || GROUPS.VIEWER,
+					),
+				}),
+				{ status: 200, headers: { "Content-Type": "application/json" } },
+			);
 		}
 
 		// ---- User management (admin only) ----
@@ -858,9 +941,9 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
 		const data = readStatus();
 
-		// List status + history
+		// List status + history (editor+)
 		if (action === "list") {
-			if (!hasPermission(currentUser, GROUPS.VIEWER)) {
+			if (!hasPermission(currentUser, GROUPS.EDITOR)) {
 				return new Response(JSON.stringify({ error: "权限不足" }), {
 					status: 403,
 					headers: { "Content-Type": "application/json" },

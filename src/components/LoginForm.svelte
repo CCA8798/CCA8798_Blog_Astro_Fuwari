@@ -6,11 +6,28 @@ let password = $state("");
 let error = $state("");
 let loading = $state(false);
 let success = $state(false);
+let isBackendUser = $state(false);
+
+function redirectAfterLogin(): void {
+	const raw = localStorage.getItem("admin_user");
+	if (!raw) return;
+	try {
+		const user = JSON.parse(raw) as { group?: string };
+		// 仅管理员/编辑进入后台，普通用户返回主站
+		isBackendUser = user.group === "admin" || user.group === "editor";
+		const target = isBackendUser ? "/admin" : "/";
+		window.location.href = target;
+	} catch {
+		window.location.href = "/";
+	}
+}
 
 onMount(() => {
 	const saved = localStorage.getItem("admin_token");
 	if (saved) {
 		success = true;
+		// 已登录访问登录页：按角色自动跳转（普通用户回主站，不进后台）
+		setTimeout(redirectAfterLogin, 800);
 	}
 });
 
@@ -29,6 +46,8 @@ async function handleLogin() {
 			if (data.user)
 				localStorage.setItem("admin_user", JSON.stringify(data.user));
 			success = true;
+			// 登录成功：管理员/编辑进后台，普通用户回主站
+			setTimeout(redirectAfterLogin, 800);
 		} else {
 			error = data.error || "登录失败";
 		}
@@ -42,10 +61,10 @@ async function handleLogin() {
 {#if success}
 	<div class="py-12 flex flex-col items-center justify-center gap-4 text-50 text-sm tracking-wider">
 		<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-green-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-		<span>登录成功</span>
-		<a href="/admin" class="px-5 py-2 rounded-lg text-sm font-medium tracking-wider
+		<span>登录成功，正在跳转…</span>
+		<a href={isBackendUser ? "/admin" : "/"} class="px-5 py-2 rounded-lg text-sm font-medium tracking-wider
 			bg-[var(--primary)] text-white hover:opacity-90 active:scale-[0.97] transition">
-			进入后台
+			{isBackendUser ? "进入后台" : "返回主站"}
 		</a>
 	</div>
 {:else}

@@ -24,7 +24,6 @@
     "@astrojs/sitemap": "^3.7.3",
     "@astrojs/svelte": "8.1.2",
     "@astrojs/tailwind": "^6.0.2",
-    "codemirror": "^6.0.0",
     "@codemirror/commands": "^6.10.4",
     "@codemirror/lang-markdown": "^6.5.1",
     "@codemirror/language": "^6.12.4",
@@ -43,11 +42,15 @@
     "@iconify/svelte": "^4.2.0",
     "@swup/astro": "^1.8.0",
     "@tailwindcss/typography": "^0.5.20",
+    "@waline/client": "^3.15.2",
+    "@waline/vercel": "^1.41.4",
     "astro": "6.4.8",
     "astro-expressive-code": "^0.44.0",
     "astro-icon": "^1.1.5",
+    "codemirror": "^6.0.0",
     "express": "^5.2.1",
     "hastscript": "^9.0.1",
+    "jsonwebtoken": "^9.0.3",
     "katex": "^0.17.0",
     "markdown-it": "^14.3.0",
     "mdast-util-to-string": "^4.0.0",
@@ -84,5 +87,10 @@
     "postcss-import": "^16.1.1",
     "postcss-nesting": "^13.0.2"
   },
-  "packageManager": "pnpm@9.14.4"
+  "packageManager": "pnpm@9.14.4",
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "better-sqlite3"
+    ]
+  }
 }

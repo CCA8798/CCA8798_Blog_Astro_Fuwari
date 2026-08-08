@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
@@ -31,6 +32,10 @@ import { remarkExcerpt } from "./src/plugins/remark-excerpt.js";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Waline 共享运行时（CJS）：dev 服务器（astro dev / vite）也挂载 /waline，行为与 server.cjs 一致
+const require = createRequire(import.meta.url);
+const walineRuntime = require("./waline-runtime.cjs");
 
 // https://astro.build/config
 export default defineConfig({
@@ -87,7 +92,11 @@ export default defineConfig({
 			},
 		}),
 		expressiveCode({
-			themes: [expressiveCodeConfig.theme, expressiveCodeConfig.theme],
+			// 内联代码块样式：Astro 6 构建管线下外部样式表（/_astro/ec.{hash}.css）
+			// 的原始内容哈希与最终产物哈希不一致导致 404，代码块彻底无样式。
+			// 内联后样式直接写入首个代码块 HTML，绕开 vite 资产管线。
+			emitExternalStylesheet: false,
+			themes: [expressiveCodeConfig.theme],
 			plugins: [
 				pluginCollapsibleSections(),
 				pluginLineNumbers(),
@@ -273,6 +282,15 @@ export default defineConfig({
 	},
 	adapter: node({ mode: "standalone" }),
 	vite: {
+		plugins: [
+			{
+				// dev 模式下将 /waline 挂载到 vite dev server，与生产 server.cjs 行为一致
+				name: "waline-dev-middleware",
+				configureServer(server) {
+					server.middlewares.use("/waline", walineRuntime.createWalineMiddleware());
+				},
+			},
+		],
 		server: {
 			https: {
 				key: fs.readFileSync(path.resolve(__dirname, "ssl/key.key")),

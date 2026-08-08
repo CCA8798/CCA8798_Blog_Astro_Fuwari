@@ -2,9 +2,22 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+// Waline 共享运行时（server 与 astro dev 共用同一份初始化/DATA/密钥）
+const waline = require('./waline-runtime.cjs');
 
 const app = express();
-app.use(express.json({ limit: '10mb' }));
+// 条件 JSON body 解析：跳过 /waline（Waline 自带 koa-body 中间件解析 payload）
+app.use((req, res, next) => {
+	if (req.path.startsWith('/waline')) return next();
+	return express.json({ limit: '10mb' })(req, res, next);
+});
+
+// ============================================================
+// Waline 评论系统（SQLite 存储，挂载于 /waline）— 详见 waline-runtime.cjs
+// ============================================================
+const WALINE_DATA_DIR = waline.WALINE_DATA_DIR;
+const WALINE_DB_PATH = waline.WALINE_DB_PATH;
 
 // --- File paths ---
 const STATUS_FILE = path.join(__dirname, 'status.json');
@@ -70,9 +83,13 @@ function writeUsers(users) {
 function initUsers() {
 	const existing = readUsers();
 	if (existing) return existing;
+	const initialPassword = process.env.ADMIN_PASSWORD;
+	if (!initialPassword) {
+		console.warn('[server] 未设置 ADMIN_PASSWORD 环境变量，初始管理员随机密码已生成。请用 env 覆盖后重启，或登录后修改。');
+	}
 	const users = DEFAULT_USERS.map(u => ({
 		...u,
-		password: hashPassword('lin20120103'),
+		password: hashPassword(initialPassword || crypto.randomBytes(18).toString('base64url')),
 	}));
 	writeUsers(users);
 	return users;
@@ -467,12 +484,17 @@ app.get('/api/me', (req, res) => {
 	if (!user) {
 		return res.json({ loggedIn: false });
 	}
+	let walineToken = null;
+	try {
+		walineToken = waline.mintWalineToken(user.username, user.displayName || user.username, user.group);
+	} catch (e) { console.error('[waline] me 桥接失败:', e.message); }
 	return res.json({
 		loggedIn: true,
 		username: user.username,
 		displayName: user.displayName || user.username,
 		group: user.group,
 		bio: user.bio || '',
+		walineToken,
 	});
 });
 
@@ -548,9 +570,15 @@ app.post('/api/admin', (req, res) => {
 
 		// Auto-login after registration
 		const sessionToken = createSession(ip, regUser);
+		// 同步桥接到 Waline 评论账号
+		let walineToken = null;
+		try {
+			walineToken = waline.mintWalineToken(regUser, regDisplay, GROUPS.VIEWER);
+		} catch (e) { console.error('[waline] 注册桥接失败:', e.message); }
 		return res.json({
 			success: true,
 			token: sessionToken,
+			walineToken,
 			user: { username: regUser, displayName: regDisplay, group: GROUPS.VIEWER },
 		});
 	}
@@ -583,9 +611,14 @@ app.post('/api/admin', (req, res) => {
 			}
 			clearRateLimit(ip);
 			const sessionToken = createSession(ip, user.username);
+			let walineToken = null;
+			try {
+				walineToken = waline.mintWalineToken(user.username, user.displayName || user.username, user.group);
+			} catch (e) { console.error('[waline] 登录桥接失败:', e.message); }
 			return res.json({
 				success: true,
 				token: sessionToken,
+				walineToken,
 				user: { username: user.username, displayName: user.displayName || user.username, group: user.group },
 			});
 		}
@@ -597,9 +630,14 @@ app.post('/api/admin', (req, res) => {
 			initUsers();
 			const adminUser = findUser('CCA8798');
 			const sessionToken = createSession(ip, adminUser ? 'CCA8798' : 'admin');
+			let walineToken = null;
+			try {
+				walineToken = waline.mintWalineToken('CCA8798', '捌拐玖捌', GROUPS.ADMIN);
+			} catch (e) { console.error('[waline] 桥接失败:', e.message); }
 			return res.json({
 				success: true,
 				token: sessionToken,
+				walineToken,
 				user: { username: 'CCA8798', displayName: '捌拐玖捌', group: 'admin' },
 			});
 		}
@@ -629,6 +667,58 @@ app.post('/api/admin', (req, res) => {
 
 	const currentUser = session.username;
 	cleanupSessions();
+
+	// ---- Profile update (own account, no group/username change) ----
+	if (action === 'profileUpdate') {
+		const newDisplayName = (req.body.displayName || '').trim();
+		const newBio = req.body.bio || '';
+		const newPassword = req.body.password || '';
+		const newConfirm = req.body.confirmPassword || '';
+
+		if (newPassword) {
+			if (newPassword.length < 6) {
+				return res.status(400).json({ error: '密码至少 6 个字符' });
+			}
+			if (newPassword !== newConfirm) {
+				return res.status(400).json({ error: '两次密码输入不一致' });
+			}
+		}
+
+		const users = readUsers() || [];
+		const idx = users.findIndex(u => u.username === currentUser);
+		if (idx === -1) {
+			return res.status(404).json({ error: '用户不存在' });
+		}
+		if (req.body.displayName !== undefined && newDisplayName !== '') {
+			users[idx].displayName = newDisplayName;
+		}
+		if (req.body.bio !== undefined) {
+			users[idx].bio = newBio;
+		}
+		if (newPassword) {
+			users[idx].password = hashPassword(newPassword);
+		}
+		writeUsers(users);
+
+		const updated = users[idx];
+		const updatedDisplayName = updated.displayName || currentUser;
+		let walineToken = null;
+		try {
+			walineToken = waline.mintWalineToken(updated.username, updatedDisplayName, updated.group || GROUPS.VIEWER);
+		} catch (e) {
+			console.error('[waline] profileUpdate 桥接失败:', e.message);
+		}
+		return res.json({
+			success: true,
+			user: {
+				username: updated.username,
+				displayName: updatedDisplayName,
+				group: updated.group,
+				bio: updated.bio || '',
+			},
+			walineToken,
+		});
+	}
 
 	// ---- User management (admin only) ----
 	if (action === 'userList') {
@@ -714,7 +804,7 @@ app.post('/api/admin', (req, res) => {
 
 	// ---- Status management (editor+) ----
 	if (action === 'list') {
-		if (!hasPermission(currentUser, GROUPS.VIEWER)) {
+		if (!hasPermission(currentUser, GROUPS.EDITOR)) {
 			return res.status(403).json({ error: '权限不足' });
 		}
 		const data = readStatus();
@@ -880,6 +970,18 @@ app.post('/api/admin', (req, res) => {
 });
 
 // ============================================================
+// Waline 评论系统：初始化 + 桥接（实现位于 waline-runtime.cjs）
+// 共享模块提供：OAuth stub、schema、用户创建、token 签发、限流中间件
+// ============================================================
+
+// Waline 每次请求 /request 都会访问 OAUTH_URL 且无超时，必须内置本地 stub（见 waline-runtime.cjs）
+
+// 为已登录用户签发 Waline 评论 token（与 Waline 内部 JWT 同密钥）
+
+// /waline 挂载：剥前缀后交给 Waline handler；仅对发布评论做限流（见 waline-runtime.cjs）
+app.use('/waline', waline.createWalineMiddleware());
+
+// ============================================================
 // Static files
 // ============================================================
 app.use(express.static(path.join(__dirname, 'dist', 'client')));
@@ -889,7 +991,7 @@ app.get('/{*path}', (req, res) => {
 	res.sendFile(path.join(__dirname, 'dist', 'client', 'index.html'));
 });
 
-const port = 4321;
+const port = Number(process.env.PORT) || 4321;
 initUsers();
 
 // --- HTTPS support ---
@@ -912,4 +1014,17 @@ if (fs.existsSync(SSL_KEY) && fs.existsSync(SSL_CERT)) {
 
 server.listen(port, () => {
 	console.log(`Server running on port ${port}`);
+	// 后台预初始化 Waline（factory 较慢），并确保管理员评论账号存在
+	waline.initWaline()
+		.then(async () => {
+			try {
+				initUsers();
+				const adminUser = findUser('CCA8798');
+				if (adminUser) {
+					const wid = waline.getOrCreateWalineUser('CCA8798', adminUser.displayName || '捌拐玖捌', GROUPS.ADMIN);
+					console.log(`[waline] 管理员评论账号就绪 (wl_Users.id=${wid})`);
+				}
+			} catch (e) { console.error('[waline] 播种管理员失败:', e.message); }
+		})
+		.catch((e) => console.error('[waline] 初始化失败:', e.message));
 });

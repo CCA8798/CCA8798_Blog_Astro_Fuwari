@@ -23,6 +23,7 @@ interface StatusData {
 let loggedIn = $state(false);
 let token = $state("");
 let loading = $state(true);
+let accessDenied = $state(false);
 let statusData = $state<StatusData | null>(null);
 let currentUser = $state<{
 	username: string;
@@ -58,7 +59,7 @@ let deletingEntry = $state<HistoryEntry | null>(null);
 let deleteLoading = $state(false);
 
 // Tab navigation
-let activeTab = $state<"status" | "posts" | "users">("status");
+let activeTab = $state<"status" | "posts" | "users" | "comments">("status");
 
 // Post list
 let postList = $state<PostInfo[]>([]);
@@ -124,21 +125,76 @@ let userError = $state("");
 let deletingUsername = $state<string | null>(null);
 let userDeleteLoading = $state(false);
 
+// Comment management (Waline)
+let walineToken = $state("");
+interface CommentInfo {
+	objectId: number;
+	comment: string;
+	orig: string;
+	nick: string;
+	mail: string;
+	link: string;
+	status: string;
+	insertedAt: string;
+	time: number;
+	ip: string;
+	ua: string;
+	url: string;
+	sticky: boolean;
+	like: number;
+	type: string;
+	pid: number;
+	rid: number;
+}
+type CommentFilter = "all" | "approved" | "waiting" | "spam";
+let commentList = $state<CommentInfo[]>([]);
+let commentListLoading = $state(false);
+let commentFilter = $state<CommentFilter>("all");
+let commentPage = $state(1);
+let commentTotalPages = $state(1);
+let commentTotal = $state(0);
+let commentSpamCount = $state(0);
+let commentWaitingCount = $state(0);
+let commentError = $state("");
+let commentActingId = $state<number | null>(null);
+let deletingCommentId = $state<number | null>(null);
+let commentDeleteLoading = $state(false);
+
 onMount(() => {
 	currentTheme = getStoredTheme();
 	const saved = localStorage.getItem("admin_token");
 	const savedUser = localStorage.getItem("admin_user");
-	if (saved) {
-		token = saved;
-		loggedIn = true;
-		if (savedUser) {
-			try {
-				currentUser = JSON.parse(savedUser);
-			} catch {
-				currentUser = null;
+	let savedWaline = localStorage.getItem("admin_waline_token");
+	// 兼容：localStorage 中无独立 walineToken 时，从评论组件写入的 WALINE_USER 恢复
+	if (!savedWaline) {
+		try {
+			const wuRaw = localStorage.getItem("WALINE_USER");
+			if (wuRaw) {
+				const wu = JSON.parse(wuRaw);
+				if (wu?.token) savedWaline = wu.token;
 			}
+		} catch {
+			/* ignore */
 		}
-		fetchData();
+	}
+	if (savedWaline) walineToken = savedWaline;
+	if (saved && savedUser) {
+		token = saved;
+		try {
+			currentUser = JSON.parse(savedUser);
+		} catch {
+			currentUser = null;
+		}
+		// 仅管理员/编辑可进入后台；普通用户(viewer)显示无权访问，不渲染后台面板
+		if (currentUser?.group === "admin" || currentUser?.group === "editor") {
+			loggedIn = true;
+			fetchData();
+			// 已登录但本地缺 walineToken：静默从 /api/me 拉取（兼容旧会话）
+			refreshWalineToken();
+		} else {
+			accessDenied = true;
+			loading = false;
+		}
 	} else {
 		loading = false;
 	}
@@ -167,6 +223,37 @@ async function api(action: string, extra: Record<string, unknown> = {}) {
 	return { ok: res.ok, status: res.status, data };
 }
 
+async function walineApi(method: string, path: string, body?: unknown) {
+	const res = await fetch(`/waline${path}`, {
+		method,
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${walineToken}`,
+		},
+		body: body ? JSON.stringify(body) : undefined,
+	});
+	const data = await res.json();
+	return { ok: res.ok, status: res.status, data };
+}
+
+/** 已登录但本地缺少 Waline 令牌时，从 /api/me 拉取并缓存（兼容旧会话/旧版本登录） */
+async function refreshWalineToken() {
+	if (walineToken || !token) return walineToken;
+	try {
+		const res = await fetch("/api/me", {
+			headers: { Authorization: `Bearer ${token}` },
+		});
+		const data = await res.json();
+		if (data?.walineToken) {
+			walineToken = data.walineToken;
+			localStorage.setItem("admin_waline_token", walineToken);
+		}
+	} catch {
+		/* ignore */
+	}
+	return walineToken;
+}
+
 async function handleLogin() {
 	loginLoading = true;
 	loginError = "";
@@ -175,10 +262,24 @@ async function handleLogin() {
 		password: loginPassword,
 	});
 	if (ok) {
+		// 仅管理员/编辑可进入后台；普通用户拒绝
+		const isBackendUser =
+			data.user?.group === "admin" || data.user?.group === "editor";
+		if (!isBackendUser) {
+			token = "";
+			loggedIn = false;
+			currentUser = null;
+			walineToken = "";
+			loginError = "该账号无后台管理权限";
+			loginLoading = false;
+			return;
+		}
 		token = data.token;
 		loggedIn = true;
 		currentUser = data.user || null;
+		walineToken = data.walineToken || "";
 		localStorage.setItem("admin_token", token);
+		localStorage.setItem("admin_waline_token", walineToken);
 		if (currentUser)
 			localStorage.setItem("admin_user", JSON.stringify(currentUser));
 		loginUsername = "";
@@ -295,8 +396,10 @@ async function logout() {
 	loggedIn = false;
 	currentUser = null;
 	statusData = null;
+	walineToken = "";
 	localStorage.removeItem("admin_token");
 	localStorage.removeItem("admin_user");
+	localStorage.removeItem("admin_waline_token");
 }
 
 function formatTime(iso: string | null): string {
@@ -512,6 +615,155 @@ async function handleDeleteUser() {
 function cancelDeleteUser() {
 	deletingUsername = null;
 }
+
+// --- Comment management (Waline) ---
+
+async function fetchComments() {
+	// 无令牌时先尝试静默恢复，仍无则提示重新登录
+	if (!walineToken) {
+		await refreshWalineToken();
+	}
+	if (!walineToken) {
+		commentError = "缺少 Waline 令牌，请重新登录";
+		return;
+	}
+	commentListLoading = true;
+	commentError = "";
+	const statusParam = commentFilter === "all" ? "" : `&status=${commentFilter}`;
+	const { ok, data } = await walineApi(
+		"GET",
+		`/api/comment?type=list&page=${commentPage}&pageSize=20${statusParam}`,
+	);
+	if (ok && data?.errno === 0) {
+		commentList = data.data.data || [];
+		commentPage = data.data.page ?? commentPage;
+		commentTotalPages = data.data.totalPages ?? 1;
+		commentTotal = data.data.count ?? 0;
+		commentSpamCount = data.data.spamCount ?? 0;
+		commentWaitingCount = data.data.waitingCount ?? 0;
+	} else {
+		commentError = data?.msg || data?.error || "获取评论失败";
+	}
+	commentListLoading = false;
+}
+
+function changeCommentFilter(filter: CommentFilter) {
+	if (commentFilter === filter) return;
+	commentFilter = filter;
+	commentPage = 1;
+	fetchComments();
+}
+
+function changeCommentPage(page: number) {
+	if (page < 1 || page > commentTotalPages || page === commentPage) return;
+	commentPage = page;
+	fetchComments();
+}
+
+async function setCommentStatus(
+	comment: CommentInfo,
+	status: "approved" | "spam" | "waiting",
+) {
+	if (comment.status === status || commentActingId !== null) return;
+	commentActingId = comment.objectId;
+	commentError = "";
+	const { ok, data } = await walineApi(
+		"PUT",
+		`/api/comment/${comment.objectId}`,
+		{
+			status,
+		},
+	);
+	if (ok && data?.errno === 0) {
+		comment.status = status;
+		if (commentFilter !== "all" && commentFilter !== status) {
+			fetchComments();
+		}
+	} else {
+		commentError = data?.msg || data?.error || "操作失败";
+	}
+	commentActingId = null;
+}
+
+function confirmDeleteComment(comment: CommentInfo) {
+	deletingCommentId = comment.objectId;
+}
+
+async function handleDeleteComment() {
+	if (deletingCommentId === null) return;
+	commentDeleteLoading = true;
+	commentError = "";
+	const { ok, data } = await walineApi(
+		"DELETE",
+		`/api/comment/${deletingCommentId}`,
+	);
+	if (ok && data?.errno === 0) {
+		deletingCommentId = null;
+		fetchComments();
+	} else {
+		commentError = data?.msg || data?.error || "删除失败";
+	}
+	commentDeleteLoading = false;
+}
+
+function cancelDeleteComment() {
+	deletingCommentId = null;
+}
+
+function commentText(comment: CommentInfo): string {
+	if (comment.orig?.trim()) return comment.orig.trim();
+	if (!comment.comment) return "";
+	return comment.comment
+		.replace(/<[^>]*>/g, "")
+		.replace(/&nbsp;/g, " ")
+		.replace(/&amp;/g, "&")
+		.replace(/&lt;/g, "<")
+		.replace(/&gt;/g, ">")
+		.replace(/&quot;/g, '"')
+		.replace(/&#39;/g, "'")
+		.trim();
+}
+
+function commentStatusLabel(status: string): string {
+	switch (status) {
+		case "approved":
+			return "已通过";
+		case "waiting":
+			return "待审";
+		case "spam":
+			return "垃圾";
+		default:
+			return status;
+	}
+}
+
+function commentStatusClass(status: string): string {
+	switch (status) {
+		case "approved":
+			return "bg-green-500/15 text-green-600 dark:text-green-400";
+		case "waiting":
+			return "bg-yellow-500/15 text-yellow-600 dark:text-yellow-400";
+		case "spam":
+			return "bg-red-500/15 text-red-600 dark:text-red-400";
+		default:
+			return "bg-neutral-500/15 text-neutral-600 dark:text-neutral-400";
+	}
+}
+
+function formatCommentTime(comment: CommentInfo): string {
+	if (comment.insertedAt) {
+		const t = formatTime(comment.insertedAt);
+		if (t !== "-") return t;
+	}
+	if (comment.time) {
+		try {
+			return formatTime(new Date(comment.time).toISOString());
+		} catch {
+			// fall through
+		}
+	}
+	return "-";
+}
 </script>
 
 <div class="min-h-screen bg-[var(--page-bg)] text-75 py-12 px-4 max-sm:py-6 max-sm:px-3">
@@ -550,7 +802,18 @@ function cancelDeleteUser() {
 			</div>
 		</div>
 
-		{#if !loggedIn}
+		{#if accessDenied}
+			<div transition:fade={{ duration: 200 }} class="py-12 flex flex-col items-center justify-center gap-4 text-50 text-sm tracking-wider">
+				<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-60"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+				<span>无权访问后台管理</span>
+				<span class="text-xs opacity-70">当前账号为普通用户，仅管理员/编辑可进入后台。</span>
+				<a href="/" class="px-5 py-2 rounded-lg text-sm font-medium tracking-wider
+					bg-[var(--primary)] text-white hover:opacity-90 active:scale-[0.97] transition">
+					返回主站
+				</a>
+			</div>
+
+		{:else if !loggedIn}
 			<div transition:fade={{ duration: 200 }} class="py-12 flex flex-col items-center justify-center gap-4 text-50 text-sm tracking-wider">
 				<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-60"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M2.1 13.1a.97.97 0 0 1 0-2.2 8.69 8.69 0 0 0 5.15-5.89.97.97 0 0 1 1.87 0 8.69 8.69 0 0 0 5.15 5.89.97.97 0 0 1 0 2.2 8.69 8.69 0 0 0-5.15 5.89.97.97 0 0 1-1.87 0 8.69 8.69 0 0 0-5.15-5.89Z"/></svg>
 				<span>请先登录</span>
@@ -570,38 +833,34 @@ function cancelDeleteUser() {
 			<!-- ===== Tab Navigation ===== -->
 			<div class="flex gap-1 mb-6 pb-1 border-b border-[var(--line-color)]">
 				<button onclick={() => { activeTab = "status"; }}
-					class="px-4 py-2 text-sm tracking-wider rounded-t-lg transition
-						class:text-[var(--primary)]={activeTab === "status"}
-						class:border-b-2={activeTab === "status"}
-						class:border-[var(--primary)]={activeTab === "status"}
-						class:text-50={activeTab !== "status"}
-						class:border-b-2={activeTab !== "status"}
-						class:border-transparent={activeTab !== "status"}">
+					class={`px-4 py-2 text-sm tracking-wider rounded-t-lg transition border-b-2 ${
+						activeTab === "status" ? "text-[var(--primary)] border-[var(--primary)]" : "text-50 border-transparent"
+					}`}>
 					状态管理
 				</button>
 				<button onclick={() => { activeTab = "posts"; fetchPostList(); }}
-					class="px-4 py-2 text-sm tracking-wider rounded-t-lg transition
-						class:text-[var(--primary)]={activeTab === "posts"}
-						class:border-b-2={activeTab === "posts"}
-						class:border-[var(--primary)]={activeTab === "posts"}
-						class:text-50={activeTab !== "posts"}
-						class:border-b-2={activeTab !== "posts"}
-						class:border-transparent={activeTab !== "posts"}">
+					class={`px-4 py-2 text-sm tracking-wider rounded-t-lg transition border-b-2 ${
+						activeTab === "posts" ? "text-[var(--primary)] border-[var(--primary)]" : "text-50 border-transparent"
+					}`}>
 					文章管理
 				</button>
-				{#if currentUser?.group === "admin"}
-					<button onclick={() => { activeTab = "users"; fetchUserList(); }}
-						class="px-4 py-2 text-sm tracking-wider rounded-t-lg transition
-							class:text-[var(--primary)]={activeTab === "users"}
-							class:border-b-2={activeTab === "users"}
-							class:border-[var(--primary)]={activeTab === "users"}
-							class:text-50={activeTab !== "users"}
-							class:border-b-2={activeTab !== "users"}
-							class:border-transparent={activeTab !== "users"}">
-						用户管理
-					</button>
-				{/if}
-			</div>
+			{#if currentUser?.group === "admin"}
+				<button onclick={() => { activeTab = "users"; fetchUserList(); }}
+					class={`px-4 py-2 text-sm tracking-wider rounded-t-lg transition border-b-2 ${
+						activeTab === "users" ? "text-[var(--primary)] border-[var(--primary)]" : "text-50 border-transparent"
+					}`}>
+					用户管理
+				</button>
+			{/if}
+			{#if currentUser?.group === "admin"}
+				<button onclick={() => { activeTab = "comments"; fetchComments(); }}
+					class={`px-4 py-2 text-sm tracking-wider rounded-t-lg transition border-b-2 ${
+						activeTab === "comments" ? "text-[var(--primary)] border-[var(--primary)]" : "text-50 border-transparent"
+					}`}>
+					评论管理
+				</button>
+			{/if}
+		</div>
 
 			{#if activeTab === "status"}
 				<!-- ===== Current Status ===== -->
@@ -680,11 +939,10 @@ function cancelDeleteUser() {
 					</h2>
 					<div class="flex flex-col gap-1">
 						{#each statusData?.history ?? [] as entry, i}
-							<div class="group flex items-start gap-2.5 p-3 border border-[var(--line-color)] rounded-lg transition
-								hover:border-[var(--primary)]/20 hover:bg-[var(--primary)]/[0.03] hover:translate-x-0.5
-								class:border-[var(--primary)]={editingId === entry.id}
-								class:bg-[var(--primary)]/[0.05]={editingId === entry.id}
-								onload-animation"
+							<div class={`group flex items-start gap-2.5 p-3 border border-[var(--line-color)] rounded-lg transition
+								hover:border-[var(--primary)]/20 hover:bg-[var(--primary)]/[0.03] hover:translate-x-0.5 onload-animation ${
+									editingId === entry.id ? "border-[var(--primary)] bg-[var(--primary)]/[0.05]" : ""
+								}`}
 								style="animation-delay: {i * 0.04}s">
 								<span class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full
 									bg-[var(--primary)]/10 text-[var(--primary)]/80 font-mono font-semibold text-xs transition
@@ -823,11 +1081,13 @@ function cancelDeleteUser() {
 									<div class="flex-1 min-w-0">
 										<div class="flex items-center gap-2 mb-0.5">
 											<span class="text-sm font-medium tracking-wide">{user.displayName}</span>
-											<span class="text-[0.6rem] px-1.5 py-0.5 rounded-full
-												class:bg-[var(--primary)]/15 class:text-[var(--primary)]={user.group === 'admin'}
-												class:bg-blue-500/15 class:text-blue-600 dark:text-blue-400={user.group === 'editor'}
-												class:bg-neutral-500/15 class:text-neutral-600 dark:text-neutral-400={user.group === 'viewer'}
-												font-medium flex-shrink-0">
+											<span class={`text-[0.6rem] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 ${
+												user.group === 'admin'
+													? "bg-[var(--primary)]/15 text-[var(--primary)] dark:text-white"
+													: user.group === 'editor'
+														? "bg-blue-500/15 text-blue-600 dark:text-blue-400"
+														: "bg-neutral-500/15 text-neutral-600 dark:text-neutral-400"
+											}`}>
 												{user.group === 'admin' ? '管理员' : user.group === 'editor' ? '编辑' : '用户'}
 											</span>
 										</div>
@@ -853,6 +1113,131 @@ function cancelDeleteUser() {
 									</div>
 								</div>
 							{/each}
+						</div>
+					{/if}
+				</div>
+			{/if}
+			{#if activeTab === "comments"}
+				<!-- ===== Comment Management (Waline) ===== -->
+				<div transition:fade={{ duration: 150 }}>
+					<div class="flex items-center justify-between mb-3">
+						<h2 class="flex items-center gap-2 text-base font-semibold tracking-wider">
+							<span class="w-1 h-4 rounded-sm bg-[var(--primary)] flex-shrink-0"></span>
+							评论列表
+							<span class="text-xs font-normal text-50 ml-1 px-2 py-0.5 rounded-full bg-[var(--primary)]/10">{commentTotal}</span>
+						</h2>
+					</div>
+
+					<div class="flex flex-wrap gap-1.5 mb-3">
+						<button onclick={() => changeCommentFilter("all")}
+							class={`px-3 py-1.5 rounded-lg text-xs font-medium tracking-wider transition hover:opacity-90 active:scale-[0.97] ${
+								commentFilter === "all" ? "bg-[var(--primary)] text-white" : "bg-[var(--primary)]/10 text-50"
+							}`}>
+							全部
+						</button>
+						<button onclick={() => changeCommentFilter("waiting")}
+							class={`px-3 py-1.5 rounded-lg text-xs font-medium tracking-wider transition hover:opacity-90 active:scale-[0.97] ${
+								commentFilter === "waiting" ? "bg-yellow-500 text-white" : "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400"
+							}`}>
+							待审{commentWaitingCount > 0 ? ` (${commentWaitingCount})` : ""}
+						</button>
+						<button onclick={() => changeCommentFilter("approved")}
+							class={`px-3 py-1.5 rounded-lg text-xs font-medium tracking-wider transition hover:opacity-90 active:scale-[0.97] ${
+								commentFilter === "approved" ? "bg-green-500 text-white" : "bg-green-500/10 text-green-600 dark:text-green-400"
+							}`}>
+							已通过
+						</button>
+						<button onclick={() => changeCommentFilter("spam")}
+							class={`px-3 py-1.5 rounded-lg text-xs font-medium tracking-wider transition hover:opacity-90 active:scale-[0.97] ${
+								commentFilter === "spam" ? "bg-red-500 text-white" : "bg-red-500/10 text-red-600 dark:text-red-400"
+							}`}>
+							垃圾{commentSpamCount > 0 ? ` (${commentSpamCount})` : ""}
+						</button>
+					</div>
+
+					{#if commentError}
+						<div class="text-xs text-red-500 bg-red-500/10 border border-red-500/15 rounded-lg px-3 py-2 mb-3">{commentError}</div>
+					{/if}
+
+					{#if commentListLoading}
+						<div class="py-8 flex items-center justify-center gap-3 text-50 text-sm">
+							<span class="w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse" />
+							加载中…
+						</div>
+					{:else if commentList.length === 0}
+						<div class="py-8 text-center text-50 text-sm">暂无评论</div>
+					{:else}
+						<div class="flex flex-col gap-1">
+							{#each commentList as comment, i}
+								<div class="group flex items-start gap-3 p-3 border border-[var(--line-color)] rounded-lg transition
+									hover:border-[var(--primary)]/20 hover:bg-[var(--primary)]/[0.03] hover:translate-x-0.5"
+									style="animation-delay: {i * 0.03}s">
+									<div class="flex-1 min-w-0">
+										<div class="flex items-center gap-2 mb-0.5 flex-wrap">
+											<span class="text-sm font-medium tracking-wide">{comment.nick}</span>
+											{#if comment.type === "administrator"}
+												<span class="text-[0.6rem] px-1.5 py-0.5 rounded-full bg-[var(--primary)]/15 text-[var(--primary)] font-medium flex-shrink-0">站长</span>
+											{/if}
+											<span class="text-[0.6rem] px-1.5 py-0.5 rounded-full {commentStatusClass(comment.status)} font-medium flex-shrink-0">{commentStatusLabel(comment.status)}</span>
+											{#if comment.mail}
+												<span class="text-xs text-50 font-mono">({comment.mail})</span>
+											{/if}
+											<span class="ml-auto text-xs font-mono text-50 flex-shrink-0">{formatCommentTime(comment)}</span>
+										</div>
+										<div class="text-xs text-50 mb-1 truncate">
+											<span class="font-mono">#{comment.objectId}</span>
+											{#if comment.url}
+												<span class="opacity-50 mx-1">|</span>
+												<span class="truncate">{comment.url}</span>
+											{/if}
+										</div>
+										<div class="text-sm leading-relaxed tracking-wide break-words whitespace-pre-wrap line-clamp-3">{commentText(comment)}</div>
+									</div>
+									<div class="flex gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition">
+										{#if comment.status !== "approved"}
+											<button onclick={() => setCommentStatus(comment, "approved")} disabled={commentActingId !== null} title="通过"
+												class="px-2.5 py-1 rounded-md text-xs font-medium transition
+													bg-green-500/15 text-green-600 dark:text-green-400 hover:bg-green-500/25
+													disabled:opacity-40">
+												通过
+											</button>
+										{/if}
+										{#if comment.status !== "spam"}
+											<button onclick={() => setCommentStatus(comment, "spam")} disabled={commentActingId !== null} title="标记为垃圾"
+												class="px-2.5 py-1 rounded-md text-xs font-medium transition
+													bg-orange-500/15 text-orange-600 dark:text-orange-400 hover:bg-orange-500/25
+													disabled:opacity-40">
+												垃圾
+											</button>
+										{/if}
+										<button onclick={() => confirmDeleteComment(comment)} title="删除"
+											class="px-2.5 py-1 rounded-md text-xs font-medium transition
+												bg-red-500/15 text-red-600 dark:text-red-400 hover:bg-red-500/25">
+											删除
+										</button>
+									</div>
+								</div>
+							{/each}
+						</div>
+					{/if}
+
+					{#if commentTotalPages > 1}
+						<div class="flex items-center justify-between mt-4 text-xs">
+							<span class="text-50 tracking-wide">共 {commentTotal} 条 · 第 {commentPage}/{commentTotalPages} 页</span>
+							<div class="flex gap-1.5">
+								<button onclick={() => changeCommentPage(commentPage - 1)} disabled={commentPage <= 1}
+									class="px-3 py-1.5 rounded-lg font-medium tracking-wider transition
+										bg-[var(--primary)]/10 text-50 hover:text-[var(--primary)] hover:bg-[var(--primary)]/20
+										disabled:opacity-40">
+									← 上一页
+								</button>
+								<button onclick={() => changeCommentPage(commentPage + 1)} disabled={commentPage >= commentTotalPages}
+									class="px-3 py-1.5 rounded-lg font-medium tracking-wider transition
+										bg-[var(--primary)]/10 text-50 hover:text-[var(--primary)] hover:bg-[var(--primary)]/20
+										disabled:opacity-40">
+									下一页 →
+								</button>
+							</div>
 						</div>
 					{/if}
 				</div>
@@ -1061,6 +1446,26 @@ function cancelDeleteUser() {
 				<button onclick={handleDeleteUser} disabled={userDeleteLoading}
 					class="px-4 py-2 rounded-lg text-sm bg-red-500 text-white hover:opacity-90 active:scale-[0.97] disabled:opacity-40 transition">
 					{userDeleteLoading ? "删除中…" : "确认删除"}
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Comment Delete Confirmation Modal -->
+{#if deletingCommentId !== null}
+	<div class="fixed inset-0 z-50 bg-black/50 dark:bg-black/70 flex items-center justify-center" onclick={cancelDeleteComment}>
+		<div class="admin-card max-w-sm w-11/12 p-6 text-center shadow-2xl text-75" onclick={(e) => e.stopPropagation()}>
+			<div class="text-red-500 opacity-70 mb-2">
+				<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 9v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+			</div>
+			<h3 class="text-base font-semibold mb-2 tracking-wider text-75">确认删除</h3>
+			<p class="text-sm text-50 mb-3 tracking-wide">确定要删除这条评论吗？其子回复也会一并删除，此操作不可撤销。</p>
+			<div class="flex gap-2 justify-center">
+				<button onclick={cancelDeleteComment} class="btn-plain px-4 py-2 text-sm">取消</button>
+				<button onclick={handleDeleteComment} disabled={commentDeleteLoading}
+					class="px-4 py-2 rounded-lg text-sm bg-red-500 text-white hover:opacity-90 active:scale-[0.97] disabled:opacity-40 transition">
+					{commentDeleteLoading ? "删除中…" : "确认删除"}
 				</button>
 			</div>
 		</div>

@@ -52,10 +52,11 @@ async function handleRegister() {
 {#if success}
 	<div class="py-12 flex flex-col items-center justify-center gap-4 text-50 text-sm tracking-wider">
 		<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-green-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-		<span>注册成功</span>
-		<a href="/admin" class="px-5 py-2 rounded-lg text-sm font-medium tracking-wider
+		<span>注册成功，已自动登录</span>
+		<span class="text-xs opacity-70">普通用户可浏览与评论，后台管理仅对管理员开放。</span>
+		<a href="/" class="px-5 py-2 rounded-lg text-sm font-medium tracking-wider
 			bg-[var(--primary)] text-white hover:opacity-90 active:scale-[0.97] transition">
-			进入后台
+			返回主站
 		</a>
 	</div>
 {:else}
