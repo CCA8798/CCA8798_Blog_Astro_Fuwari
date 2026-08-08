@@ -38,6 +38,9 @@ status.json
 # admin
 rate-limit.json
 register-rate.json
+
+# waline comment runtime data (SQLite)
+data/
 admin-session.json
 admin-config.json
 users.json
@@ -53,3 +56,9 @@ ecosystem.config.cjs
 
 # opencode session state
 .omo/
+
+# playwright mcp artifacts (local testing only)
+.playwright-mcp/
+
+# deploy script kept local only (injects WALINE_SUPER_ADMIN_PASSWORD from data/)
+start.ps1
