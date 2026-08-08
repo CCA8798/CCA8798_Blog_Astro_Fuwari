@@ -98,9 +98,7 @@ const ogImageSrc = image || siteConfig.ogImage?.src;
 ---
 
 <!DOCTYPE html>
-<html lang={siteLang} class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px]"
-	  data-overlayscrollbars-initialize
->
+<html lang={siteLang} class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px]">
 	<head>
 		<title>{pageTitle}</title>
 
@@ -210,7 +208,6 @@ const ogImageSrc = image || siteConfig.ogImage?.src;
 
 	</head>
 	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
-		  data-overlayscrollbars-initialize
 	>
 		<BackgroundParticles />
 		<ConfigCarrier></ConfigCarrier>\
