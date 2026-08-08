@@ -47,6 +47,7 @@
     "astro": "6.4.8",
     "astro-expressive-code": "^0.44.0",
     "astro-icon": "^1.1.5",
+    "better-sqlite3": "11.10.0",
     "codemirror": "^6.0.0",
     "express": "^5.2.1",
     "hastscript": "^9.0.1",
